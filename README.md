@@ -5,7 +5,7 @@
 
 An interactive sales analytics dashboard analyzing 12 months of e-commerce data across 5 regions, 6 categories, and 121,000+ orders.
 
-**[🔗 Live Demo](https://your-username.github.io/ecommerce-dashboard)**
+**[🔗 Live Demo](https://pintuyadav5468.github.io/ecommerce-dashboard)**
 
 ![Dashboard Preview](preview.png)
 
@@ -114,8 +114,8 @@ Data was cleaned and aggregated using `data_prep.py`.
 
 ## 👤 Author
 
-**Your Name**  
-[LinkedIn](https://linkedin.com/in/your-profile) · [GitHub](https://github.com/your-username)
+**Pintu Yadav**  
+[LinkedIn](https://linkedin.com/in/pintuyadav5468) · [GitHub](https://github.com/pintuyadav5468)
 
 *Built as part of a portfolio project — Apr 2026*
 =======
