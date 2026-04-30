@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 📊 E-Commerce Sales Dashboard
 
 > **Resume Line:** E-Commerce Sales Dashboard — Power BI, Excel, Python (Pandas) — Apr 2026
@@ -117,3 +118,7 @@ Data was cleaned and aggregated using `data_prep.py`.
 [LinkedIn](https://linkedin.com/in/your-profile) · [GitHub](https://github.com/your-username)
 
 *Built as part of a portfolio project — Apr 2026*
+=======
+# ecommerce-dashboard
+Interactive e-commerce sales dashboard - Python, Chart.js
+>>>>>>> 151e1a5ad0447268e8f35e1a68612ca062703b83
