@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Commerce Sales Dashboard 2024</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #11141c;
+    --surface2: #181c27;
+    --border: #1e2535;
+    --accent: #5b8fff;
+    --accent2: #ff6b6b;
+    --accent3: #43d9ad;
+    --accent4: #f9c74f;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 40px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-head); font-weight: 800; font-size: 13px; color: var(--bg);
+  }
+  .logo-text { font-family: var(--font-head); font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+  .logo-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  .header-meta { font-size: 11px; color: var(--muted); text-align: right; line-height: 1.6; }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    background: rgba(91,143,255,0.15); color: var(--accent);
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+
+  /* ── FILTERS ── */
+  .filters {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 40px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    flex-wrap: wrap;
+  }
+  .filter-label { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-right: 4px; }
+  select {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 12px; font-family: var(--font-mono); font-size: 12px;
+    cursor: pointer; outline: none;
+    transition: border-color 0.2s;
+  }
+  select:hover, select:focus { border-color: var(--accent); }
+  .filter-sep { width: 1px; height: 20px; background: var(--border); }
+  .reset-btn {
+    background: transparent; color: var(--accent2); border: 1px solid var(--accent2);
+    border-radius: 6px; padding: 5px 14px; font-family: var(--font-mono); font-size: 11px;
+    cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { background: rgba(255,107,107,0.12); }
+
+  /* ── MAIN GRID ── */
+  main { padding: 32px 40px; display: flex; flex-direction: column; gap: 24px; }
+
+  /* ── KPI CARDS ── */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .kpi-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .kpi-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .kpi-card.blue::before { background: var(--accent); }
+  .kpi-card.red::before  { background: var(--accent2); }
+  .kpi-card.green::before{ background: var(--accent3); }
+  .kpi-card.yellow::before{ background: var(--accent4); }
+  .kpi-card:hover { border-color: rgba(91,143,255,0.3); transform: translateY(-2px); }
+  .kpi-label { font-size: 10px; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; }
+  .kpi-value { font-family: var(--font-head); font-size: 32px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .kpi-value.blue  { color: var(--accent); }
+  .kpi-value.red   { color: var(--accent2); }
+  .kpi-value.green { color: var(--accent3); }
+  .kpi-value.yellow{ color: var(--accent4); }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .kpi-icon { position: absolute; right: 20px; top: 20px; font-size: 28px; opacity: 0.15; }
+
+  /* ── CHART CONTAINERS ── */
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .charts-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .chart-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; display: flex; flex-direction: column; gap: 16px;
+  }
+  .chart-title {
+    font-family: var(--font-head); font-size: 14px; font-weight: 700;
+    letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px;
+  }
+  .chart-title .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+  }
+  .chart-wrap { position: relative; flex: 1; min-height: 0; }
+  .chart-wrap canvas { max-height: 100% !important; }
+
+  /* ── TABLE ── */
+  .table-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+  }
+  .table-header {
+    padding: 20px 24px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    padding: 10px 24px; text-align: left;
+    font-size: 10px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  td { padding: 14px 24px; font-size: 12px; border-bottom: 1px solid rgba(30,37,53,0.5); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(91,143,255,0.04); }
+  .trend-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .trend-bar {
+    height: 4px; border-radius: 2px; background: var(--accent);
+    flex-shrink: 0; transition: width 0.6s ease;
+  }
+
+  /* ── METRIC PILL ── */
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 20px; font-size: 10px;
+  }
+  .pill.up   { background: rgba(67,217,173,0.15); color: var(--accent3); }
+  .pill.down { background: rgba(255,107,107,0.15); color: var(--accent2); }
+
+  /* ── BOTTOM STRIP ── */
+  .attribution {
+    text-align: center; padding: 20px;
+    font-size: 10px; color: var(--muted); letter-spacing: 0.1em;
+    border-top: 1px solid var(--border);
+  }
+  .attribution span { color: var(--accent); }
+
+  @media (max-width: 1100px) {
+    .kpi-row { grid-template-columns: repeat(2,1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+    .charts-row-3 { grid-template-columns: 1fr 1fr; }
+    main { padding: 20px; }
+    header { padding: 16px 20px; }
+    .filters { padding: 12px 20px; }
+  }
+  @media (max-width: 640px) {
+    .charts-row-3 { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">E</div>
+    <div>
+      <div class="logo-text">EcomInsights</div>
+      <div class="logo-sub">Sales Analytics Dashboard</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <span class="badge">Power BI Equivalent</span><br>
+    FY 2024 &nbsp;·&nbsp; Python + Chart.js
+  </div>
+</header>
+
+<div class="filters">
+  <span class="filter-label">Filter:</span>
+  <select id="regionFilter">
+    <option value="all">All Regions</option>
+    <option value="North America">North America</option>
+    <option value="Europe">Europe</option>
+    <option value="Asia Pacific">Asia Pacific</option>
+    <option value="Latin America">Latin America</option>
+    <option value="Middle East">Middle East</option>
+  </select>
+  <select id="categoryFilter">
+    <option value="all">All Categories</option>
+    <option value="Electronics">Electronics</option>
+    <option value="Clothing">Clothing</option>
+    <option value="Home & Garden">Home &amp; Garden</option>
+    <option value="Sports">Sports</option>
+    <option value="Books">Books</option>
+    <option value="Beauty">Beauty</option>
+  </select>
+  <div class="filter-sep"></div>
+  <button class="reset-btn" onclick="resetFilters()">↺ Reset</button>
+</div>
+
+<main>
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi-card blue">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value blue" id="kpi-revenue">—</div>
+      <div class="kpi-sub" id="kpi-revenue-sub">FY 2024</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-icon">🛒</div>
+      <div class="kpi-label">Total Orders</div>
+      <div class="kpi-value green" id="kpi-orders">—</div>
+      <div class="kpi-sub">Across all channels</div>
+    </div>
+    <div class="kpi-card yellow">
+      <div class="kpi-icon">📦</div>
+      <div class="kpi-label">Avg Order Value</div>
+      <div class="kpi-value yellow" id="kpi-aov">—</div>
+      <div class="kpi-sub">Revenue ÷ Orders (DAX)</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-icon">↩️</div>
+      <div class="kpi-label">Avg Return Rate</div>
+      <div class="kpi-value red" id="kpi-return">—</div>
+      <div class="kpi-sub">Returns ÷ Orders</div>
+    </div>
+  </div>
+
+  <!-- Revenue Trend + Donut -->
+  <div class="charts-row" style="height:320px;">
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot"></span>Revenue Trend — Monthly</div>
+      <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent4)"></span>Revenue by Region</div>
+      <div class="chart-wrap"><canvas id="donutChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Category Bar + Return Rate + Bubble -->
+  <div class="charts-row-3" style="height:280px;">
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent3)"></span>Category Revenue</div>
+      <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent2)"></span>Return Rate by Category</div>
+      <div class="chart-wrap"><canvas id="returnChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot" style="background:var(--accent4)"></span>Orders vs Revenue</div>
+      <div class="chart-wrap"><canvas id="scatterChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Detail Table -->
+  <div class="table-card">
+    <div class="table-header">
+      <div class="chart-title"><span class="dot" style="background:var(--accent2)"></span>Category Performance Breakdown</div>
+      <span style="font-size:11px; color:var(--muted);">Drill-down view</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Revenue</th>
+          <th>Orders</th>
+          <th>Avg Order Value</th>
+          <th>Return Rate</th>
+          <th>Revenue Share</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<div class="attribution">
+  Built by <span>Your Name</span> &nbsp;·&nbsp;
+  Tools: <span>Python (Pandas)</span>, <span>Chart.js</span>, HTML/CSS &nbsp;·&nbsp;
+  Dataset: E-Commerce Sales 2024 (Kaggle) &nbsp;·&nbsp;
+  Apr 2026
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+// EMBEDDED DATA (generated by data_prep.py)
+// ──────────────────────────────────────────────
+const RAW = [{"month":"2024-01","month_label":"Jan 2024","region":"North America","category":"Electronics","revenue":30795,"orders":350,"returns":33,"avg_order":87.99,"net_revenue":27891.33,"return_rate":9.43},{"month":"2024-01","month_label":"Jan 2024","region":"North America","category":"Clothing","revenue":91820,"orders":201,"returns":8,"avg_order":456.82,"net_revenue":88165.44,"return_rate":3.98},{"month":"2024-01","month_label":"Jan 2024","region":"North America","category":"Home & Garden","revenue":52194,"orders":538,"returns":58,"avg_order":97.01,"net_revenue":46567.42,"return_rate":10.78},{"month":"2024-01","month_label":"Jan 2024","region":"North America","category":"Sports","revenue":59131,"orders":210,"returns":6,"avg_order":281.58,"net_revenue":57441.52,"return_rate":2.86},{"month":"2024-01","month_label":"Jan 2024","region":"North America","category":"Books","revenue":15769,"orders":423,"returns":44,"avg_order":37.28,"net_revenue":14128.68,"return_rate":10.4},{"month":"2024-01","month_label":"Jan 2024","region":"North America","category":"Beauty","revenue":82969,"orders":271,"returns":32,"avg_order":306.16,"net_revenue":73171.88,"return_rate":11.81},{"month":"2024-01","month_label":"Jan 2024","region":"Europe","category":"Electronics","revenue":98104,"orders":539,"returns":45,"avg_order":182.01,"net_revenue":89913.55,"return_rate":8.35},{"month":"2024-01","month_label":"Jan 2024","region":"Europe","category":"Clothing","revenue":86932,"orders":554,"returns":47,"avg_order":156.92,"net_revenue":79556.76,"return_rate":8.48},{"month":"2024-01","month_label":"Jan 2024","region":"Europe","category":"Home & Garden","revenue":33431,"orders":555,"returns":65,"avg_order":60.24,"net_revenue":29515.4,"return_rate":11.71},{"month":"2024-01","month_label":"Jan 2024","region":"Europe","category":"Sports","revenue":74150,"orders":269,"returns":10,"avg_order":275.65,"net_revenue":71393.5,"return_rate":3.72},{"month":"2024-01","month_label":"Jan 2024","region":"Europe","category":"Books","revenue":50773,"orders":323,"returns":26,"avg_order":157.19,"net_revenue":46686.06,"return_rate":8.05},{"month":"2024-01","month_label":"Jan 2024","region":"Europe","category":"Beauty","revenue":26394,"orders":564,"returns":47,"avg_order":46.8,"net_revenue":24194.4,"return_rate":8.33},{"month":"2024-01","month_label":"Jan 2024","region":"Asia Pacific","category":"Electronics","revenue":111276,"orders":246,"returns":7,"avg_order":452.34,"net_revenue":108109.62,"return_rate":2.85},{"month":"2024-01","month_label":"Jan 2024","region":"Asia Pacific","category":"Clothing","revenue":23792,"orders":395,"returns":31,"avg_order":60.23,"net_revenue":21924.87,"return_rate":7.85},{"month":"2024-01","month_label":"Jan 2024","region":"Asia Pacific","category":"Home & Garden","revenue":58001,"orders":425,"returns":16,"avg_order":136.47,"net_revenue":55817.48,"return_rate":3.76},{"month":"2024-01","month_label":"Jan 2024","region":"Asia Pacific","category":"Sports","revenue":38483,"orders":534,"returns":45,"avg_order":72.07,"net_revenue":35239.85,"return_rate":8.43},{"month":"2024-01","month_label":"Jan 2024","region":"Asia Pacific","category":"Books","revenue":32159,"orders":114,"returns":12,"avg_order":282.1,"net_revenue":28773.8,"return_rate":10.53},{"month":"2024-01","month_label":"Jan 2024","region":"Asia Pacific","category":"Beauty","revenue":107067,"orders":467,"returns":27,"avg_order":229.27,"net_revenue":100876.71,"return_rate":5.78},{"month":"2024-01","month_label":"Jan 2024","region":"Latin America","category":"Electronics","revenue":92189,"orders":185,"returns":15,"avg_order":498.32,"net_revenue":84714.2,"return_rate":8.11},{"month":"2024-01","month_label":"Jan 2024","region":"Latin America","category":"Clothing","revenue":24692,"orders":481,"returns":47,"avg_order":51.33,"net_revenue":22279.49,"return_rate":9.77},{"month":"2024-01","month_label":"Jan 2024","region":"Latin America","category":"Home & Garden","revenue":80697,"orders":281,"returns":31,"avg_order":287.18,"net_revenue":71794.42,"return_rate":11.03},{"month":"2024-01","month_label":"Jan 2024","region":"Latin America","category":"Sports","revenue":47606,"orders":350,"returns":13,"avg_order":136.02,"net_revenue":45837.74,"return_rate":3.71},{"month":"2024-01","month_label":"Jan 2024","region":"Latin America","category":"Books","revenue":106387,"orders":375,"returns":39,"avg_order":283.7,"net_revenue":95322.7,"return_rate":10.4},{"month":"2024-01","month_label":"Jan 2024","region":"Latin America","category":"Beauty","revenue":39300,"orders":417,"returns":32,"avg_order":94.24,"net_revenue":36284.32,"return_rate":7.67},{"month":"2024-01","month_label":"Jan 2024","region":"Middle East","category":"Electronics","revenue":101807,"orders":296,"returns":16,"avg_order":343.94,"net_revenue":96303.96,"return_rate":5.41},{"month":"2024-01","month_label":"Jan 2024","region":"Middle East","category":"Clothing","revenue":23571,"orders":572,"returns":24,"avg_order":41.21,"net_revenue":22581.96,"return_rate":4.2},{"month":"2024-01","month_label":"Jan 2024","region":"Middle East","category":"Home & Garden","revenue":66214,"orders":144,"returns":4,"avg_order":459.82,"net_revenue":64374.72,"return_rate":2.78},{"month":"2024-01","month_label":"Jan 2024","region":"Middle East","category":"Sports","revenue":17568,"orders":423,"returns":27,"avg_order":41.53,"net_revenue":16446.69,"return_rate":6.38},{"month":"2024-01","month_label":"Jan 2024","region":"Middle East","category":"Books","revenue":17695,"orders":551,"returns":17,"avg_order":32.11,"net_revenue":17149.13,"return_rate":3.09},{"month":"2024-01","month_label":"Jan 2024","region":"Middle East","category":"Beauty","revenue":102538,"orders":471,"returns":45,"avg_order":217.7,"net_revenue":92741.5,"return_rate":9.55},{"month":"2024-02","month_label":"Feb 2024","region":"North America","category":"Electronics","revenue":27666,"orders":569,"returns":35,"avg_order":48.62,"net_revenue":25964.3,"return_rate":6.15},{"month":"2024-02","month_label":"Feb 2024","region":"North America","category":"Clothing","revenue":119488,"orders":107,"returns":11,"avg_order":1116.71,"net_revenue":107204.19,"return_rate":10.28},{"month":"2024-02","month_label":"Feb 2024","region":"North America","category":"Home & Garden","revenue":45535,"orders":112,"returns":4,"avg_order":406.56,"net_revenue":43908.76,"return_rate":3.57},{"month":"2024-02","month_label":"Feb 2024","region":"North America","category":"Sports","revenue":50222,"orders":178,"returns":14,"avg_order":282.15,"net_revenue":46271.9,"return_rate":7.87},{"month":"2024-02","month_label":"Feb 2024","region":"North America","category":"Books","revenue":25965,"orders":541,"returns":57,"avg_order":47.99,"net_revenue":23229.57,"return_rate":10.54},{"month":"2024-02","month_label":"Feb 2024","region":"North America","category":"Beauty","revenue":97948,"orders":297,"returns":15,"avg_order":329.79,"net_revenue":93001.15,"return_rate":5.05},{"month":"2024-02","month_label":"Feb 2024","region":"Europe","category":"Electronics","revenue":105982,"orders":472,"returns":44,"avg_order":224.54,"net_revenue":96102.24,"return_rate":9.32},{"month":"2024-02","month_label":"Feb 2024","region":"Europe","category":"Clothing","revenue":102897,"orders":540,"returns":26,"avg_order":190.55,"net_revenue":97942.7,"return_rate":4.81},{"month":"2024-02","month_label":"Feb 2024","region":"Europe","category":"Home & Garden","revenue":65015,"orders":320,"returns":18,"avg_order":203.17,"net_revenue":61357.94,"return_rate":5.62},{"month":"2024-02","month_label":"Feb 2024","region":"Europe","category":"Sports","revenue":102939,"orders":564,"returns":29,"avg_order":182.52,"net_revenue":97645.92,"return_rate":5.14},{"month":"2024-02","month_label":"Feb 2024","region":"Europe","category":"Books","revenue":71044,"orders":250,"returns":12,"avg_order":284.18,"net_revenue":67633.84,"return_rate":4.8},{"month":"2024-02","month_label":"Feb 2024","region":"Europe","category":"Beauty","revenue":70820,"orders":239,"returns":20,"avg_order":296.32,"net_revenue":64893.6,"return_rate":8.37},{"month":"2024-02","month_label":"Feb 2024","region":"Asia Pacific","category":"Electronics","revenue":108426,"orders":165,"returns":18,"avg_order":657.13,"net_revenue":96597.66,"return_rate":10.91},{"month":"2024-02","month_label":"Feb 2024","region":"Asia Pacific","category":"Clothing","revenue":79044,"orders":107,"returns":5,"avg_order":738.73,"net_revenue":75350.35,"return_rate":4.67},{"month":"2024-02","month_label":"Feb 2024","region":"Asia Pacific","category":"Home & Garden","revenue":40939,"orders":410,"returns":24,"avg_order":99.85,"net_revenue":38542.6,"return_rate":5.85},{"month":"2024-02","month_label":"Feb 2024","region":"Asia Pacific","category":"Sports","revenue":90766,"orders":427,"returns":26,"avg_order":212.57,"net_revenue":85239.18,"return_rate":6.09},{"month":"2024-02","month_label":"Feb 2024","region":"Asia Pacific","category":"Books","revenue":38776,"orders":464,"returns":23,"avg_order":83.57,"net_revenue":36853.89,"return_rate":4.96},{"month":"2024-02","month_label":"Feb 2024","region":"Asia Pacific","category":"Beauty","revenue":76373,"orders":338,"returns":10,"avg_order":225.96,"net_revenue":74113.4,"return_rate":2.96},{"month":"2024-02","month_label":"Feb 2024","region":"Latin America","category":"Electronics","revenue":36959,"orders":490,"returns":33,"avg_order":75.43,"net_revenue":34469.81,"return_rate":6.73},{"month":"2024-02","month_label":"Feb 2024","region":"Latin America","category":"Clothing","revenue":18748,"orders":304,"returns":12,"avg_order":61.67,"net_revenue":18007.96,"return_rate":3.95},{"month":"2024-02","month_label":"Feb 2024","region":"Latin America","category":"Home & Garden","revenue":81199,"orders":453,"returns":22,"avg_order":179.25,"net_revenue":77255.5,"return_rate":4.86},{"month":"2024-02","month_label":"Feb 2024","region":"Latin America","category":"Sports","revenue":83840,"orders":192,"returns":6,"avg_order":436.67,"net_revenue":81219.98,"return_rate":3.12},{"month":"2024-02","month_label":"Feb 2024","region":"Latin America","category":"Books","revenue":54353,"orders":347,"returns":18,"avg_order":156.64,"net_revenue":51533.48,"return_rate":5.19},{"month":"2024-02","month_label":"Feb 2024","region":"Latin America","category":"Beauty","revenue":104474,"orders":192,"returns":8,"avg_order":544.14,"net_revenue":100120.88,"return_rate":4.17},{"month":"2024-02","month_label":"Feb 2024","region":"Middle East","category":"Electronics","revenue":108264,"orders":192,"returns":22,"avg_order":563.88,"net_revenue":95858.64,"return_rate":11.46},{"month":"2024-02","month_label":"Feb 2024","region":"Middle East","category":"Clothing","revenue":15854,"orders":304,"returns":26,"avg_order":52.15,"net_revenue":14498.1,"return_rate":8.55},{"month":"2024-02","month_label":"Feb 2024","region":"Middle East","category":"Home & Garden","revenue":61717,"orders":209,"returns":16,"avg_order":295.3,"net_revenue":56992.2,"return_rate":7.66},{"month":"2024-02","month_label":"Feb 2024","region":"Middle East","category":"Sports","revenue":119095,"orders":495,"returns":41,"avg_order":240.6,"net_revenue":109230.4,"return_rate":8.28},{"month":"2024-02","month_label":"Feb 2024","region":"Middle East","category":"Books","revenue":67662,"orders":282,"returns":17,"avg_order":239.94,"net_revenue":63583.02,"return_rate":6.03},{"month":"2024-02","month_label":"Feb 2024","region":"Middle East","category":"Beauty","revenue":27688,"orders":373,"returns":23,"avg_order":74.23,"net_revenue":25980.71,"return_rate":6.17},{"month":"2024-03","month_label":"Mar 2024","region":"North America","category":"Electronics","revenue":67083,"orders":277,"returns":18,"avg_order":242.18,"net_revenue":62723.76,"return_rate":6.5},{"month":"2024-03","month_label":"Mar 2024","region":"North America","category":"Clothing","revenue":95623,"orders":223,"returns":23,"avg_order":428.8,"net_revenue":85760.6,"return_rate":10.31},{"month":"2024-03","month_label":"Mar 2024","region":"North America","category":"Home & Garden","revenue":57107,"orders":266,"returns":12,"avg_order":214.69,"net_revenue":54530.72,"return_rate":4.51},{"month":"2024-03","month_label":"Mar 2024","region":"North America","category":"Sports","revenue":30708,"orders":482,"returns":45,"avg_order":63.71,"net_revenue":27841.05,"return_rate":9.34},{"month":"2024-03","month_label":"Mar 2024","region":"North America","category":"Books","revenue":110742,"orders":226,"returns":13,"avg_order":490.01,"net_revenue":104371.87,"return_rate":5.75},{"month":"2024-03","month_label":"Mar 2024","region":"North America","category":"Beauty","revenue":82270,"orders":568,"returns":52,"avg_order":144.84,"net_revenue":74738.32,"return_rate":9.15},{"month":"2024-03","month_label":"Mar 2024","region":"Europe","category":"Electronics","revenue":86295,"orders":417,"returns":43,"avg_order":206.94,"net_revenue":77396.58,"return_rate":10.31},{"month":"2024-03","month_label":"Mar 2024","region":"Europe","category":"Clothing","revenue":16802,"orders":552,"returns":26,"avg_order":30.44,"net_revenue":16010.56,"return_rate":4.71},{"month":"2024-03","month_label":"Mar 2024","region":"Europe","category":"Home & Garden","revenue":36918,"orders":377,"returns":20,"avg_order":97.93,"net_revenue":34959.4,"return_rate":5.31},{"month":"2024-03","month_label":"Mar 2024","region":"Europe","category":"Sports","revenue":61843,"orders":223,"returns":23,"avg_order":277.32,"net_revenue":55464.64,"return_rate":10.31},{"month":"2024-03","month_label":"Mar 2024","region":"Europe","category":"Books","revenue":31371,"orders":81,"returns":9,"avg_order":387.3,"net_revenue":27885.3,"return_rate":11.11},{"month":"2024-03","month_label":"Mar 2024","region":"Europe","category":"Beauty","revenue":35932,"orders":116,"returns":12,"avg_order":309.76,"net_revenue":32214.88,"return_rate":10.34},{"month":"2024-03","month_label":"Mar 2024","region":"Asia Pacific","category":"Electronics","revenue":87694,"orders":88,"returns":4,"avg_order":996.52,"net_revenue":83707.92,"return_rate":4.55},{"month":"2024-03","month_label":"Mar 2024","region":"Asia Pacific","category":"Clothing","revenue":57642,"orders":287,"returns":31,"avg_order":200.84,"net_revenue":51415.96,"return_rate":10.8},{"month":"2024-03","month_label":"Mar 2024","region":"Asia Pacific","category":"Home & Garden","revenue":21295,"orders":133,"returns":13,"avg_order":160.11,"net_revenue":19213.57,"return_rate":9.77},{"month":"2024-03","month_label":"Mar 2024","region":"Asia Pacific","category":"Sports","revenue":27183,"orders":499,"returns":55,"avg_order":54.47,"net_revenue":24187.15,"return_rate":11.02},{"month":"2024-03","month_label":"Mar 2024","region":"Asia Pacific","category":"Books","revenue":76267,"orders":333,"returns":10,"avg_order":229.03,"net_revenue":73976.7,"return_rate":3.0},{"month":"2024-03","month_label":"Mar 2024","region":"Asia Pacific","category":"Beauty","revenue":17557,"orders":552,"returns":49,"avg_order":31.81,"net_revenue":15998.31,"return_rate":8.88},{"month":"2024-03","month_label":"Mar 2024","region":"Latin America","category":"Electronics","revenue":83497,"orders":417,"returns":30,"avg_order":200.23,"net_revenue":77490.1,"return_rate":7.19},{"month":"2024-03","month_label":"Mar 2024","region":"Latin America","category":"Clothing","revenue":76135,"orders":240,"returns":7,"avg_order":317.23,"net_revenue":73914.39,"return_rate":2.92},{"month":"2024-03","month_label":"Mar 2024","region":"Latin America","category":"Home & Garden","revenue":106412,"orders":583,"returns":51,"avg_order":182.52,"net_revenue":97103.48,"return_rate":8.75},{"month":"2024-03","month_label":"Mar 2024","region":"Latin America","category":"Sports","revenue":61214,"orders":274,"returns":24,"avg_order":223.41,"net_revenue":55852.16,"return_rate":8.76},{"month":"2024-03","month_label":"Mar 2024","region":"Latin America","category":"Books","revenue":59064,"orders":539,"returns":40,"avg_order":109.58,"net_revenue":54680.8,"return_rate":7.42},{"month":"2024-03","month_label":"Mar 2024","region":"Latin America","category":"Beauty","revenue":60525,"orders":454,"returns":23,"avg_order":133.31,"net_revenue":57458.87,"return_rate":5.07},{"month":"2024-03","month_label":"Mar 2024","region":"Middle East","category":"Electronics","revenue":94909,"orders":309,"returns":20,"avg_order":307.15,"net_revenue":88766.0,"return_rate":6.47},{"month":"2024-03","month_label":"Mar 2024","region":"Middle East","category":"Clothing","revenue":91213,"orders":362,"returns":25,"avg_order":251.97,"net_revenue":84913.75,"return_rate":6.91},{"month":"2024-03","month_label":"Mar 2024","region":"Middle East","category":"Home & Garden","revenue":63404,"orders":363,"returns":32,"avg_order":174.67,"net_revenue":57814.56,"return_rate":8.82},{"month":"2024-03","month_label":"Mar 2024","region":"Middle East","category":"Sports","revenue":20600,"orders":532,"returns":26,"avg_order":38.72,"net_revenue":19593.28,"return_rate":4.89},{"month":"2024-03","month_label":"Mar 2024","region":"Middle East","category":"Books","revenue":89543,"orders":595,"returns":19,"avg_order":150.49,"net_revenue":86683.69,"return_rate":3.19},{"month":"2024-03","month_label":"Mar 2024","region":"Middle East","category":"Beauty","revenue":88744,"orders":251,"returns":28,"avg_order":353.56,"net_revenue":78844.32,"return_rate":11.16},{"month":"2024-04","month_label":"Apr 2024","region":"North America","category":"Electronics","revenue":58484,"orders":125,"returns":14,"avg_order":467.87,"net_revenue":51933.82,"return_rate":11.2},{"month":"2024-04","month_label":"Apr 2024","region":"North America","category":"Clothing","revenue":62202,"orders":116,"returns":13,"avg_order":536.22,"net_revenue":55231.14,"return_rate":11.21},{"month":"2024-04","month_label":"Apr 2024","region":"North America","category":"Home & Garden","revenue":111752,"orders":381,"returns":44,"avg_order":293.31,"net_revenue":98846.36,"return_rate":11.55},{"month":"2024-04","month_label":"Apr 2024","region":"North America","category":"Sports","revenue":81235,"orders":195,"returns":11,"avg_order":416.59,"net_revenue":76652.51,"return_rate":5.64},{"month":"2024-04","month_label":"Apr 2024","region":"North America","category":"Books","revenue":116279,"orders":240,"returns":14,"avg_order":484.5,"net_revenue":109496.0,"return_rate":5.83},{"month":"2024-04","month_label":"Apr 2024","region":"North America","category":"Beauty","revenue":41641,"orders":402,"returns":32,"avg_order":103.58,"net_revenue":38326.44,"return_rate":7.96},{"month":"2024-04","month_label":"Apr 2024","region":"Europe","category":"Electronics","revenue":51631,"orders":367,"returns":33,"avg_order":140.68,"net_revenue":46988.56,"return_rate":8.99},{"month":"2024-04","month_label":"Apr 2024","region":"Europe","category":"Clothing","revenue":33070,"orders":234,"returns":13,"avg_order":141.32,"net_revenue":31232.84,"return_rate":5.56},{"month":"2024-04","month_label":"Apr 2024","region":"Europe","category":"Home & Garden","revenue":60017,"orders":183,"returns":16,"avg_order":327.96,"net_revenue":54769.64,"return_rate":8.74},{"month":"2024-04","month_label":"Apr 2024","region":"Europe","category":"Sports","revenue":93069,"orders":255,"returns":20,"avg_order":364.98,"net_revenue":85769.4,"return_rate":7.84},{"month":"2024-04","month_label":"Apr 2024","region":"Europe","category":"Books","revenue":20801,"orders":487,"returns":54,"avg_order":42.71,"net_revenue":18494.66,"return_rate":11.09},{"month":"2024-04","month_label":"Apr 2024","region":"Europe","category":"Beauty","revenue":102545,"orders":115,"returns":11,"avg_order":891.7,"net_revenue":92736.3,"return_rate":9.57},{"month":"2024-04","month_label":"Apr 2024","region":"Asia Pacific","category":"Electronics","revenue":17368,"orders":591,"returns":38,"avg_order":29.39,"net_revenue":16251.18,"return_rate":6.43},{"month":"2024-04","month_label":"Apr 2024","region":"Asia Pacific","category":"Clothing","revenue":91429,"orders":550,"returns":17,"avg_order":166.23,"net_revenue":88603.09,"return_rate":3.09},{"month":"2024-04","month_label":"Apr 2024","region":"Asia Pacific","category":"Home & Garden","revenue":47097,"orders":130,"returns":9,"avg_order":362.28,"net_revenue":43836.48,"return_rate":6.92},{"month":"2024-04","month_label":"Apr 2024","region":"Asia Pacific","category":"Sports","revenue":64726,"orders":269,"returns":15,"avg_order":240.62,"net_revenue":61116.7,"return_rate":5.58},{"month":"2024-04","month_label":"Apr 2024","region":"Asia Pacific","category":"Books","revenue":70609,"orders":421,"returns":22,"avg_order":167.72,"net_revenue":66919.16,"return_rate":5.23},{"month":"2024-04","month_label":"Apr 2024","region":"Asia Pacific","category":"Beauty","revenue":85313,"orders":133,"returns":10,"avg_order":641.45,"net_revenue":78898.5,"return_rate":7.52},{"month":"2024-04","month_label":"Apr 2024","region":"Latin America","category":"Electronics","revenue":107772,"orders":343,"returns":34,"avg_order":314.2,"net_revenue":97089.2,"return_rate":9.91},{"month":"2024-04","month_label":"Apr 2024","region":"Latin America","category":"Clothing","revenue":18051,"orders":84,"returns":5,"avg_order":214.89,"net_revenue":16976.55,"return_rate":5.95},{"month":"2024-04","month_label":"Apr 2024","region":"Latin America","category":"Home & Garden","revenue":69021,"orders":429,"returns":33,"avg_order":160.89,"net_revenue":63711.63,"return_rate":7.69},{"month":"2024-04","month_label":"Apr 2024","region":"Latin America","category":"Sports","revenue":54734,"orders":348,"returns":40,"avg_order":157.28,"net_revenue":48442.8,"return_rate":11.49},{"month":"2024-04","month_label":"Apr 2024","region":"Latin America","category":"Books","revenue":98613,"orders":199,"returns":10,"avg_order":495.54,"net_revenue":93657.6,"return_rate":5.03},{"month":"2024-04","month_label":"Apr 2024","region":"Latin America","category":"Beauty","revenue":43251,"orders":137,"returns":5,"avg_order":315.7,"net_revenue":41672.5,"return_rate":3.65},{"month":"2024-04","month_label":"Apr 2024","region":"Middle East","category":"Electronics","revenue":105852,"orders":553,"returns":64,"avg_order":191.41,"net_revenue":93601.76,"return_rate":11.57},{"month":"2024-04","month_label":"Apr 2024","region":"Middle East","category":"Clothing","revenue":66990,"orders":206,"returns":19,"avg_order":325.19,"net_revenue":60811.39,"return_rate":9.22},{"month":"2024-04","month_label":"Apr 2024","region":"Middle East","category":"Home & Garden","revenue":89740,"orders":137,"returns":15,"avg_order":655.04,"net_revenue":79914.4,"return_rate":10.95},{"month":"2024-04","month_label":"Apr 2024","region":"Middle East","category":"Sports","revenue":61175,"orders":197,"returns":18,"avg_order":310.53,"net_revenue":55585.46,"return_rate":9.14},{"month":"2024-04","month_label":"Apr 2024","region":"Middle East","category":"Books","revenue":60543,"orders":316,"returns":17,"avg_order":191.59,"net_revenue":57285.97,"return_rate":5.38},{"month":"2024-04","month_label":"Apr 2024","region":"Middle East","category":"Beauty","revenue":18343,"orders":268,"returns":25,"avg_order":68.44,"net_revenue":16632.0,"return_rate":9.33},{"month":"2024-05","month_label":"May 2024","region":"North America","category":"Electronics","revenue":24662,"orders":326,"returns":11,"avg_order":75.65,"net_revenue":23829.85,"return_rate":3.37},{"month":"2024-05","month_label":"May 2024","region":"North America","category":"Clothing","revenue":82215,"orders":514,"returns":50,"avg_order":159.95,"net_revenue":74217.5,"return_rate":9.73},{"month":"2024-05","month_label":"May 2024","region":"North America","category":"Home & Garden","revenue":99664,"orders":364,"returns":14,"avg_order":273.8,"net_revenue":95830.8,"return_rate":3.85},{"month":"2024-05","month_label":"May 2024","region":"North America","category":"Sports","revenue":69340,"orders":126,"returns":4,"avg_order":550.32,"net_revenue":67138.72,"return_rate":3.17},{"month":"2024-05","month_label":"May 2024","region":"North America","category":"Books","revenue":110981,"orders":532,"returns":38,"avg_order":208.61,"net_revenue":103053.82,"return_rate":7.14},{"month":"2024-05","month_label":"May 2024","region":"North America","category":"Beauty","revenue":50247,"orders":420,"returns":30,"avg_order":119.64,"net_revenue":46657.8,"return_rate":7.14},{"month":"2024-05","month_label":"May 2024","region":"Europe","category":"Electronics","revenue":77752,"orders":333,"returns":22,"avg_order":233.49,"net_revenue":72615.22,"return_rate":6.61},{"month":"2024-05","month_label":"May 2024","region":"Europe","category":"Clothing","revenue":41646,"orders":179,"returns":6,"avg_order":232.66,"net_revenue":40250.04,"return_rate":3.35},{"month":"2024-05","month_label":"May 2024","region":"Europe","category":"Home & Garden","revenue":55158,"orders":521,"returns":39,"avg_order":105.87,"net_revenue":51029.07,"return_rate":7.49},{"month":"2024-05","month_label":"May 2024","region":"Europe","category":"Sports","revenue":56975,"orders":404,"returns":36,"avg_order":141.03,"net_revenue":51897.92,"return_rate":8.91},{"month":"2024-05","month_label":"May 2024","region":"Europe","category":"Books","revenue":42663,"orders":415,"returns":36,"avg_order":102.8,"net_revenue":38962.2,"return_rate":8.67},{"month":"2024-05","month_label":"May 2024","region":"Europe","category":"Beauty","revenue":109704,"orders":239,"returns":27,"avg_order":459.01,"net_revenue":97310.73,"return_rate":11.3},{"month":"2024-05","month_label":"May 2024","region":"Asia Pacific","category":"Electronics","revenue":33071,"orders":459,"returns":19,"avg_order":72.05,"net_revenue":31702.05,"return_rate":4.14},{"month":"2024-05","month_label":"May 2024","region":"Asia Pacific","category":"Clothing","revenue":85588,"orders":506,"returns":58,"avg_order":169.15,"net_revenue":75777.3,"return_rate":11.46},{"month":"2024-05","month_label":"May 2024","region":"Asia Pacific","category":"Home & Garden","revenue":112856,"orders":496,"returns":43,"avg_order":227.53,"net_revenue":103072.21,"return_rate":8.67},{"month":"2024-05","month_label":"May 2024","region":"Asia Pacific","category":"Sports","revenue":97986,"orders":364,"returns":13,"avg_order":269.19,"net_revenue":94486.53,"return_rate":3.57},{"month":"2024-05","month_label":"May 2024","region":"Asia Pacific","category":"Books","revenue":53494,"orders":381,"returns":12,"avg_order":140.4,"net_revenue":51809.2,"return_rate":3.15},{"month":"2024-05","month_label":"May 2024","region":"Asia Pacific","category":"Beauty","revenue":107658,"orders":114,"returns":6,"avg_order":944.37,"net_revenue":101991.78,"return_rate":5.26},{"month":"2024-05","month_label":"May 2024","region":"Latin America","category":"Electronics","revenue":109297,"orders":497,"returns":26,"avg_order":219.91,"net_revenue":103579.34,"return_rate":5.23},{"month":"2024-05","month_label":"May 2024","region":"Latin America","category":"Clothing","revenue":35358,"orders":275,"returns":25,"avg_order":128.57,"net_revenue":32143.75,"return_rate":9.09},{"month":"2024-05","month_label":"May 2024","region":"Latin America","category":"Home & Garden","revenue":53513,"orders":572,"returns":65,"avg_order":93.55,"net_revenue":47432.25,"return_rate":11.36},{"month":"2024-05","month_label":"May 2024","region":"Latin America","category":"Sports","revenue":22543,"orders":499,"returns":33,"avg_order":45.18,"net_revenue":21052.06,"return_rate":6.61},{"month":"2024-05","month_label":"May 2024","region":"Latin America","category":"Books","revenue":104084,"orders":473,"returns":32,"avg_order":220.05,"net_revenue":97042.4,"return_rate":6.77},{"month":"2024-05","month_label":"May 2024","region":"Latin America","category":"Beauty","revenue":50735,"orders":271,"returns":22,"avg_order":187.21,"net_revenue":46616.38,"return_rate":8.12},{"month":"2024-05","month_label":"May 2024","region":"Middle East","category":"Electronics","revenue":98042,"orders":175,"returns":10,"avg_order":560.24,"net_revenue":92439.6,"return_rate":5.71},{"month":"2024-05","month_label":"May 2024","region":"Middle East","category":"Clothing","revenue":22357,"orders":116,"returns":5,"avg_order":192.73,"net_revenue":21393.35,"return_rate":4.31},{"month":"2024-05","month_label":"May 2024","region":"Middle East","category":"Home & Garden","revenue":35150,"orders":358,"returns":35,"avg_order":98.18,"net_revenue":31713.7,"return_rate":9.78},{"month":"2024-05","month_label":"May 2024","region":"Middle East","category":"Sports","revenue":36352,"orders":352,"returns":27,"avg_order":103.27,"net_revenue":33563.71,"return_rate":7.67},{"month":"2024-05","month_label":"May 2024","region":"Middle East","category":"Books","revenue":56555,"orders":421,"returns":23,"avg_order":134.33,"net_revenue":53465.41,"return_rate":5.46},{"month":"2024-05","month_label":"May 2024","region":"Middle East","category":"Beauty","revenue":54954,"orders":256,"returns":8,"avg_order":214.66,"net_revenue":53236.72,"return_rate":3.12},{"month":"2024-06","month_label":"Jun 2024","region":"North America","category":"Electronics","revenue":78932,"orders":312,"returns":33,"avg_order":252.99,"net_revenue":70583.33,"return_rate":10.58},{"month":"2024-06","month_label":"Jun 2024","region":"North America","category":"Clothing","revenue":84896,"orders":534,"returns":62,"avg_order":158.98,"net_revenue":75039.24,"return_rate":11.61},{"month":"2024-06","month_label":"Jun 2024","region":"North America","category":"Home & Garden","revenue":66934,"orders":463,"returns":33,"avg_order":144.57,"net_revenue":62163.19,"return_rate":7.13},{"month":"2024-06","month_label":"Jun 2024","region":"North America","category":"Sports","revenue":75921,"orders":446,"returns":16,"avg_order":170.23,"net_revenue":73197.32,"return_rate":3.59},{"month":"2024-06","month_label":"Jun 2024","region":"North America","category":"Books","revenue":117795,"orders":104,"returns":8,"avg_order":1132.64,"net_revenue":108733.88,"return_rate":7.69},{"month":"2024-06","month_label":"Jun 2024","region":"North America","category":"Beauty","revenue":102508,"orders":563,"returns":64,"avg_order":182.07,"net_revenue":90855.52,"return_rate":11.37},{"month":"2024-06","month_label":"Jun 2024","region":"Europe","category":"Electronics","revenue":81703,"orders":118,"returns":4,"avg_order":692.4,"net_revenue":78933.4,"return_rate":3.39},{"month":"2024-06","month_label":"Jun 2024","region":"Europe","category":"Clothing","revenue":36545,"orders":265,"returns":9,"avg_order":137.91,"net_revenue":35303.81,"return_rate":3.4},{"month":"2024-06","month_label":"Jun 2024","region":"Europe","category":"Home & Garden","revenue":118033,"orders":212,"returns":20,"avg_order":556.76,"net_revenue":106897.8,"return_rate":9.43},{"month":"2024-06","month_label":"Jun 2024","region":"Europe","category":"Sports","revenue":89460,"orders":314,"returns":29,"avg_order":284.9,"net_revenue":81197.9,"return_rate":9.24},{"month":"2024-06","month_label":"Jun 2024","region":"Europe","category":"Books","revenue":118150,"orders":88,"returns":8,"avg_order":1342.61,"net_revenue":107409.12,"return_rate":9.09},{"month":"2024-06","month_label":"Jun 2024","region":"Europe","category":"Beauty","revenue":115843,"orders":332,"returns":35,"avg_order":348.92,"net_revenue":103630.8,"return_rate":10.54},{"month":"2024-06","month_label":"Jun 2024","region":"Asia Pacific","category":"Electronics","revenue":36677,"orders":247,"returns":9,"avg_order":148.49,"net_revenue":35340.59,"return_rate":3.64},{"month":"2024-06","month_label":"Jun 2024","region":"Asia Pacific","category":"Clothing","revenue":108105,"orders":273,"returns":10,"avg_order":395.99,"net_revenue":104145.1,"return_rate":3.66},{"month":"2024-06","month_label":"Jun 2024","region":"Asia Pacific","category":"Home & Garden","revenue":69693,"orders":418,"returns":34,"avg_order":166.73,"net_revenue":64024.18,"return_rate":8.13},{"month":"2024-06","month_label":"Jun 2024","region":"Asia Pacific","category":"Sports","revenue":57348,"orders":421,"returns":43,"avg_order":136.22,"net_revenue":51490.54,"return_rate":10.21},{"month":"2024-06","month_label":"Jun 2024","region":"Asia Pacific","category":"Books","revenue":72854,"orders":406,"returns":48,"avg_order":179.44,"net_revenue":64240.88,"return_rate":11.82},{"month":"2024-06","month_label":"Jun 2024","region":"Asia Pacific","category":"Beauty","revenue":106267,"orders":149,"returns":13,"avg_order":713.2,"net_revenue":96995.4,"return_rate":8.72},{"month":"2024-06","month_label":"Jun 2024","region":"Latin America","category":"Electronics","revenue":49578,"orders":524,"returns":33,"avg_order":94.61,"net_revenue":46455.87,"return_rate":6.3},{"month":"2024-06","month_label":"Jun 2024","region":"Latin America","category":"Clothing","revenue":41790,"orders":170,"returns":8,"avg_order":245.82,"net_revenue":39823.44,"return_rate":4.71},{"month":"2024-06","month_label":"Jun 2024","region":"Latin America","category":"Home & Garden","revenue":108714,"orders":118,"returns":8,"avg_order":921.31,"net_revenue":101343.52,"return_rate":6.78},{"month":"2024-06","month_label":"Jun 2024","region":"Latin America","category":"Sports","revenue":101188,"orders":299,"returns":24,"avg_order":338.42,"net_revenue":93065.92,"return_rate":8.03},{"month":"2024-06","month_label":"Jun 2024","region":"Latin America","category":"Books","revenue":45355,"orders":555,"returns":54,"avg_order":81.72,"net_revenue":40942.12,"return_rate":9.73},{"month":"2024-06","month_label":"Jun 2024","region":"Latin America","category":"Beauty","revenue":40470,"orders":440,"returns":42,"avg_order":91.98,"net_revenue":36606.84,"return_rate":9.55},{"month":"2024-06","month_label":"Jun 2024","region":"Middle East","category":"Electronics","revenue":54298,"orders":427,"returns":49,"avg_order":127.16,"net_revenue":48067.16,"return_rate":11.48},{"month":"2024-06","month_label":"Jun 2024","region":"Middle East","category":"Clothing","revenue":114518,"orders":587,"returns":32,"avg_order":195.09,"net_revenue":108275.12,"return_rate":5.45},{"month":"2024-06","month_label":"Jun 2024","region":"Middle East","category":"Home & Garden","revenue":48591,"orders":196,"returns":22,"avg_order":247.91,"net_revenue":43136.98,"return_rate":11.22},{"month":"2024-06","month_label":"Jun 2024","region":"Middle East","category":"Sports","revenue":51395,"orders":252,"returns":8,"avg_order":203.95,"net_revenue":49763.4,"return_rate":3.17},{"month":"2024-06","month_label":"Jun 2024","region":"Middle East","category":"Books","revenue":35559,"orders":292,"returns":34,"avg_order":121.78,"net_revenue":31418.48,"return_rate":11.64},{"month":"2024-06","month_label":"Jun 2024","region":"Middle East","category":"Beauty","revenue":36732,"orders":306,"returns":28,"avg_order":120.04,"net_revenue":33370.88,"return_rate":9.15},{"month":"2024-07","month_label":"Jul 2024","region":"North America","category":"Electronics","revenue":86726,"orders":312,"returns":15,"avg_order":277.97,"net_revenue":82556.45,"return_rate":4.81},{"month":"2024-07","month_label":"Jul 2024","region":"North America","category":"Clothing","revenue":67638,"orders":592,"returns":51,"avg_order":114.25,"net_revenue":61811.25,"return_rate":8.61},{"month":"2024-07","month_label":"Jul 2024","region":"North America","category":"Home & Garden","revenue":83866,"orders":550,"returns":18,"avg_order":152.48,"net_revenue":81121.36,"return_rate":3.27},{"month":"2024-07","month_label":"Jul 2024","region":"North America","category":"Sports","revenue":93859,"orders":409,"returns":47,"avg_order":229.48,"net_revenue":83073.44,"return_rate":11.49},{"month":"2024-07","month_label":"Jul 2024","region":"North America","category":"Books","revenue":36447,"orders":437,"returns":31,"avg_order":83.4,"net_revenue":33861.6,"return_rate":7.09},{"month":"2024-07","month_label":"Jul 2024","region":"North America","category":"Beauty","revenue":81203,"orders":452,"returns":24,"avg_order":179.65,"net_revenue":76891.4,"return_rate":5.31},{"month":"2024-07","month_label":"Jul 2024","region":"Europe","category":"Electronics","revenue":61427,"orders":169,"returns":10,"avg_order":363.47,"net_revenue":57792.3,"return_rate":5.92},{"month":"2024-07","month_label":"Jul 2024","region":"Europe","category":"Clothing","revenue":46921,"orders":120,"returns":6,"avg_order":391.01,"net_revenue":44574.94,"return_rate":5.0},{"month":"2024-07","month_label":"Jul 2024","region":"Europe","category":"Home & Garden","revenue":119346,"orders":581,"returns":19,"avg_order":205.41,"net_revenue":115443.21,"return_rate":3.27},{"month":"2024-07","month_label":"Jul 2024","region":"Europe","category":"Sports","revenue":53088,"orders":540,"returns":49,"avg_order":98.31,"net_revenue":48270.81,"return_rate":9.07},{"month":"2024-07","month_label":"Jul 2024","region":"Europe","category":"Books","revenue":97844,"orders":332,"returns":38,"avg_order":294.71,"net_revenue":86645.02,"return_rate":11.45},{"month":"2024-07","month_label":"Jul 2024","region":"Europe","category":"Beauty","revenue":71178,"orders":335,"returns":27,"avg_order":212.47,"net_revenue":65441.31,"return_rate":8.06},{"month":"2024-07","month_label":"Jul 2024","region":"Asia Pacific","category":"Electronics","revenue":90672,"orders":529,"returns":19,"avg_order":171.4,"net_revenue":87415.4,"return_rate":3.59},{"month":"2024-07","month_label":"Jul 2024","region":"Asia Pacific","category":"Clothing","revenue":73141,"orders":321,"returns":25,"avg_order":227.85,"net_revenue":67444.75,"return_rate":7.79},{"month":"2024-07","month_label":"Jul 2024","region":"Asia Pacific","category":"Home & Garden","revenue":52892,"orders":198,"returns":13,"avg_order":267.13,"net_revenue":49419.31,"return_rate":6.57},{"month":"2024-07","month_label":"Jul 2024","region":"Asia Pacific","category":"Sports","revenue":76813,"orders":144,"returns":10,"avg_order":533.42,"net_revenue":71478.8,"return_rate":6.94},{"month":"2024-07","month_label":"Jul 2024","region":"Asia Pacific","category":"Books","revenue":77292,"orders":361,"returns":23,"avg_order":214.11,"net_revenue":72367.47,"return_rate":6.37},{"month":"2024-07","month_label":"Jul 2024","region":"Asia Pacific","category":"Beauty","revenue":35309,"orders":540,"returns":19,"avg_order":65.39,"net_revenue":34066.59,"return_rate":3.52},{"month":"2024-07","month_label":"Jul 2024","region":"Latin America","category":"Electronics","revenue":90880,"orders":178,"returns":7,"avg_order":510.56,"net_revenue":87306.08,"return_rate":3.93},{"month":"2024-07","month_label":"Jul 2024","region":"Latin America","category":"Clothing","revenue":15404,"orders":597,"returns":55,"avg_order":25.8,"net_revenue":13985.0,"return_rate":9.21},{"month":"2024-07","month_label":"Jul 2024","region":"Latin America","category":"Home & Garden","revenue":75100,"orders":516,"returns":42,"avg_order":145.54,"net_revenue":68987.32,"return_rate":8.14},{"month":"2024-07","month_label":"Jul 2024","region":"Latin America","category":"Sports","revenue":84172,"orders":537,"returns":34,"avg_order":156.74,"net_revenue":78842.84,"return_rate":6.33},{"month":"2024-07","month_label":"Jul 2024","region":"Latin America","category":"Books","revenue":71397,"orders":536,"returns":22,"avg_order":133.2,"net_revenue":68466.6,"return_rate":4.1},{"month":"2024-07","month_label":"Jul 2024","region":"Latin America","category":"Beauty","revenue":60106,"orders":525,"returns":57,"avg_order":114.49,"net_revenue":53580.07,"return_rate":10.86},{"month":"2024-07","month_label":"Jul 2024","region":"Middle East","category":"Electronics","revenue":60543,"orders":113,"returns":7,"avg_order":535.78,"net_revenue":56792.54,"return_rate":6.19},{"month":"2024-07","month_label":"Jul 2024","region":"Middle East","category":"Clothing","revenue":22239,"orders":233,"returns":17,"avg_order":95.45,"net_revenue":20616.35,"return_rate":7.3},{"month":"2024-07","month_label":"Jul 2024","region":"Middle East","category":"Home & Garden","revenue":76877,"orders":197,"returns":20,"avg_order":390.24,"net_revenue":69072.2,"return_rate":10.15},{"month":"2024-07","month_label":"Jul 2024","region":"Middle East","category":"Sports","revenue":47049,"orders":347,"returns":35,"avg_order":135.59,"net_revenue":42303.35,"return_rate":10.09},{"month":"2024-07","month_label":"Jul 2024","region":"Middle East","category":"Books","revenue":88963,"orders":468,"returns":17,"avg_order":190.09,"net_revenue":85731.47,"return_rate":3.63},{"month":"2024-07","month_label":"Jul 2024","region":"Middle East","category":"Beauty","revenue":52626,"orders":480,"returns":20,"avg_order":109.64,"net_revenue":50433.2,"return_rate":4.17},{"month":"2024-08","month_label":"Aug 2024","region":"North America","category":"Electronics","revenue":34758,"orders":286,"returns":28,"avg_order":121.53,"net_revenue":31355.16,"return_rate":9.79},{"month":"2024-08","month_label":"Aug 2024","region":"North America","category":"Clothing","revenue":92709,"orders":154,"returns":7,"avg_order":602.01,"net_revenue":88494.93,"return_rate":4.55},{"month":"2024-08","month_label":"Aug 2024","region":"North America","category":"Home & Garden","revenue":96317,"orders":385,"returns":31,"avg_order":250.17,"net_revenue":88561.73,"return_rate":8.05},{"month":"2024-08","month_label":"Aug 2024","region":"North America","category":"Sports","revenue":21941,"orders":414,"returns":28,"avg_order":53.0,"net_revenue":20457.0,"return_rate":6.76},{"month":"2024-08","month_label":"Aug 2024","region":"North America","category":"Books","revenue":76886,"orders":387,"returns":30,"avg_order":198.67,"net_revenue":70925.9,"return_rate":7.75},{"month":"2024-08","month_label":"Aug 2024","region":"North America","category":"Beauty","revenue":71800,"orders":414,"returns":27,"avg_order":173.43,"net_revenue":67117.39,"return_rate":6.52},{"month":"2024-08","month_label":"Aug 2024","region":"Europe","category":"Electronics","revenue":85390,"orders":185,"returns":19,"avg_order":461.57,"net_revenue":76620.17,"return_rate":10.27},{"month":"2024-08","month_label":"Aug 2024","region":"Europe","category":"Clothing","revenue":118196,"orders":217,"returns":24,"avg_order":544.68,"net_revenue":105123.68,"return_rate":11.06},{"month":"2024-08","month_label":"Aug 2024","region":"Europe","category":"Home & Garden","revenue":102369,"orders":587,"returns":21,"avg_order":174.39,"net_revenue":98706.81,"return_rate":3.58},{"month":"2024-08","month_label":"Aug 2024","region":"Europe","category":"Sports","revenue":117468,"orders":132,"returns":8,"avg_order":889.91,"net_revenue":110348.72,"return_rate":6.06},{"month":"2024-08","month_label":"Aug 2024","region":"Europe","category":"Books","revenue":119573,"orders":122,"returns":6,"avg_order":980.11,"net_revenue":113692.34,"return_rate":4.92},{"month":"2024-08","month_label":"Aug 2024","region":"Europe","category":"Beauty","revenue":21254,"orders":262,"returns":21,"avg_order":81.12,"net_revenue":19550.48,"return_rate":8.02},{"month":"2024-08","month_label":"Aug 2024","region":"Asia Pacific","category":"Electronics","revenue":21090,"orders":453,"returns":42,"avg_order":46.56,"net_revenue":19134.48,"return_rate":9.27},{"month":"2024-08","month_label":"Aug 2024","region":"Asia Pacific","category":"Clothing","revenue":73243,"orders":439,"returns":40,"avg_order":166.84,"net_revenue":66569.4,"return_rate":9.11},{"month":"2024-08","month_label":"Aug 2024","region":"Asia Pacific","category":"Home & Garden","revenue":56240,"orders":274,"returns":29,"avg_order":205.26,"net_revenue":50287.46,"return_rate":10.58},{"month":"2024-08","month_label":"Aug 2024","region":"Asia Pacific","category":"Sports","revenue":48434,"orders":172,"returns":20,"avg_order":281.59,"net_revenue":42802.2,"return_rate":11.63},{"month":"2024-08","month_label":"Aug 2024","region":"Asia Pacific","category":"Books","revenue":43732,"orders":130,"returns":4,"avg_order":336.4,"net_revenue":42386.4,"return_rate":3.08},{"month":"2024-08","month_label":"Aug 2024","region":"Asia Pacific","category":"Beauty","revenue":102044,"orders":545,"returns":30,"avg_order":187.24,"net_revenue":96426.8,"return_rate":5.5},{"month":"2024-08","month_label":"Aug 2024","region":"Latin America","category":"Electronics","revenue":51668,"orders":484,"returns":38,"avg_order":106.75,"net_revenue":47611.5,"return_rate":7.85},{"month":"2024-08","month_label":"Aug 2024","region":"Latin America","category":"Clothing","revenue":119680,"orders":425,"returns":46,"avg_order":281.6,"net_revenue":106726.4,"return_rate":10.82},{"month":"2024-08","month_label":"Aug 2024","region":"Latin America","category":"Home & Garden","revenue":106865,"orders":152,"returns":5,"avg_order":703.06,"net_revenue":103349.7,"return_rate":3.29},{"month":"2024-08","month_label":"Aug 2024","region":"Latin America","category":"Sports","revenue":37574,"orders":200,"returns":18,"avg_order":187.87,"net_revenue":34192.34,"return_rate":9.0},{"month":"2024-08","month_label":"Aug 2024","region":"Latin America","category":"Books","revenue":70645,"orders":186,"returns":20,"avg_order":379.81,"net_revenue":63048.8,"return_rate":10.75},{"month":"2024-08","month_label":"Aug 2024","region":"Latin America","category":"Beauty","revenue":67796,"orders":416,"returns":22,"avg_order":162.97,"net_revenue":64210.66,"return_rate":5.29},{"month":"2024-08","month_label":"Aug 2024","region":"Middle East","category":"Electronics","revenue":94104,"orders":87,"returns":8,"avg_order":1081.66,"net_revenue":85450.72,"return_rate":9.2},{"month":"2024-08","month_label":"Aug 2024","region":"Middle East","category":"Clothing","revenue":65428,"orders":382,"returns":24,"avg_order":171.28,"net_revenue":61317.28,"return_rate":6.28},{"month":"2024-08","month_label":"Aug 2024","region":"Middle East","category":"Home & Garden","revenue":23717,"orders":553,"returns":54,"avg_order":42.89,"net_revenue":21400.94,"return_rate":9.76},{"month":"2024-08","month_label":"Aug 2024","region":"Middle East","category":"Sports","revenue":82661,"orders":295,"returns":27,"avg_order":280.21,"net_revenue":75095.33,"return_rate":9.15},{"month":"2024-08","month_label":"Aug 2024","region":"Middle East","category":"Books","revenue":19621,"orders":391,"returns":16,"avg_order":50.18,"net_revenue":18818.12,"return_rate":4.09},{"month":"2024-08","month_label":"Aug 2024","region":"Middle East","category":"Beauty","revenue":20122,"orders":442,"returns":34,"avg_order":45.52,"net_revenue":18574.32,"return_rate":7.69},{"month":"2024-09","month_label":"Sep 2024","region":"North America","category":"Electronics","revenue":103869,"orders":94,"returns":3,"avg_order":1104.99,"net_revenue":100554.03,"return_rate":3.19},{"month":"2024-09","month_label":"Sep 2024","region":"North America","category":"Clothing","revenue":53518,"orders":564,"returns":26,"avg_order":94.89,"net_revenue":51050.86,"return_rate":4.61},{"month":"2024-09","month_label":"Sep 2024","region":"North America","category":"Home & Garden","revenue":16062,"orders":352,"returns":17,"avg_order":45.63,"net_revenue":15286.29,"return_rate":4.83},{"month":"2024-09","month_label":"Sep 2024","region":"North America","category":"Sports","revenue":71793,"orders":205,"returns":8,"avg_order":350.21,"net_revenue":68991.32,"return_rate":3.9},{"month":"2024-09","month_label":"Sep 2024","region":"North America","category":"Books","revenue":119592,"orders":291,"returns":21,"avg_order":410.97,"net_revenue":110961.63,"return_rate":7.22},{"month":"2024-09","month_label":"Sep 2024","region":"North America","category":"Beauty","revenue":22561,"orders":146,"returns":12,"avg_order":154.53,"net_revenue":20706.64,"return_rate":8.22},{"month":"2024-09","month_label":"Sep 2024","region":"Europe","category":"Electronics","revenue":41734,"orders":307,"returns":24,"avg_order":135.94,"net_revenue":38471.44,"return_rate":7.82},{"month":"2024-09","month_label":"Sep 2024","region":"Europe","category":"Clothing","revenue":94905,"orders":448,"returns":36,"avg_order":211.84,"net_revenue":87278.76,"return_rate":8.04},{"month":"2024-09","month_label":"Sep 2024","region":"Europe","category":"Home & Garden","revenue":96449,"orders":504,"returns":30,"avg_order":191.37,"net_revenue":90707.9,"return_rate":5.95},{"month":"2024-09","month_label":"Sep 2024","region":"Europe","category":"Sports","revenue":99659,"orders":361,"returns":30,"avg_order":276.06,"net_revenue":91377.2,"return_rate":8.31},{"month":"2024-09","month_label":"Sep 2024","region":"Europe","category":"Books","revenue":90703,"orders":394,"returns":46,"avg_order":230.21,"net_revenue":80113.34,"return_rate":11.68},{"month":"2024-09","month_label":"Sep 2024","region":"Europe","category":"Beauty","revenue":18812,"orders":456,"returns":23,"avg_order":41.25,"net_revenue":17863.25,"return_rate":5.04},{"month":"2024-09","month_label":"Sep 2024","region":"Asia Pacific","category":"Electronics","revenue":42285,"orders":356,"returns":15,"avg_order":118.78,"net_revenue":40503.3,"return_rate":4.21},{"month":"2024-09","month_label":"Sep 2024","region":"Asia Pacific","category":"Clothing","revenue":86158,"orders":595,"returns":63,"avg_order":144.8,"net_revenue":77035.6,"return_rate":10.59},{"month":"2024-09","month_label":"Sep 2024","region":"Asia Pacific","category":"Home & Garden","revenue":91125,"orders":216,"returns":8,"avg_order":421.88,"net_revenue":87749.96,"return_rate":3.7},{"month":"2024-09","month_label":"Sep 2024","region":"Asia Pacific","category":"Sports","revenue":39818,"orders":119,"returns":11,"avg_order":334.61,"net_revenue":36137.29,"return_rate":9.24},{"month":"2024-09","month_label":"Sep 2024","region":"Asia Pacific","category":"Books","revenue":24111,"orders":302,"returns":33,"avg_order":79.84,"net_revenue":21476.28,"return_rate":10.93},{"month":"2024-09","month_label":"Sep 2024","region":"Asia Pacific","category":"Beauty","revenue":56427,"orders":154,"returns":16,"avg_order":366.41,"net_revenue":50564.44,"return_rate":10.39},{"month":"2024-09","month_label":"Sep 2024","region":"Latin America","category":"Electronics","revenue":15117,"orders":583,"returns":55,"avg_order":25.93,"net_revenue":13690.85,"return_rate":9.43},{"month":"2024-09","month_label":"Sep 2024","region":"Latin America","category":"Clothing","revenue":118864,"orders":273,"returns":21,"avg_order":435.4,"net_revenue":109720.6,"return_rate":7.69},{"month":"2024-09","month_label":"Sep 2024","region":"Latin America","category":"Home & Garden","revenue":94239,"orders":105,"returns":5,"avg_order":897.51,"net_revenue":89751.45,"return_rate":4.76},{"month":"2024-09","month_label":"Sep 2024","region":"Latin America","category":"Sports","revenue":112579,"orders":405,"returns":47,"avg_order":277.97,"net_revenue":99514.41,"return_rate":11.6},{"month":"2024-09","month_label":"Sep 2024","region":"Latin America","category":"Books","revenue":79323,"orders":304,"returns":29,"avg_order":260.93,"net_revenue":71756.03,"return_rate":9.54},{"month":"2024-09","month_label":"Sep 2024","region":"Latin America","category":"Beauty","revenue":119587,"orders":80,"returns":6,"avg_order":1494.84,"net_revenue":110617.96,"return_rate":7.5},{"month":"2024-09","month_label":"Sep 2024","region":"Middle East","category":"Electronics","revenue":57533,"orders":218,"returns":24,"avg_order":263.91,"net_revenue":51199.16,"return_rate":11.01},{"month":"2024-09","month_label":"Sep 2024","region":"Middle East","category":"Clothing","revenue":62362,"orders":89,"returns":7,"avg_order":700.7,"net_revenue":57457.1,"return_rate":7.87},{"month":"2024-09","month_label":"Sep 2024","region":"Middle East","category":"Home & Garden","revenue":24865,"orders":251,"returns":12,"avg_order":99.06,"net_revenue":23676.28,"return_rate":4.78},{"month":"2024-09","month_label":"Sep 2024","region":"Middle East","category":"Sports","revenue":20287,"orders":400,"returns":16,"avg_order":50.72,"net_revenue":19475.48,"return_rate":4.0},{"month":"2024-09","month_label":"Sep 2024","region":"Middle East","category":"Books","revenue":34216,"orders":498,"returns":30,"avg_order":68.71,"net_revenue":32154.7,"return_rate":6.02},{"month":"2024-09","month_label":"Sep 2024","region":"Middle East","category":"Beauty","revenue":98524,"orders":397,"returns":38,"avg_order":248.17,"net_revenue":89093.54,"return_rate":9.57},{"month":"2024-10","month_label":"Oct 2024","region":"North America","category":"Electronics","revenue":57929,"orders":413,"returns":47,"avg_order":140.26,"net_revenue":51336.78,"return_rate":11.38},{"month":"2024-10","month_label":"Oct 2024","region":"North America","category":"Clothing","revenue":116834,"orders":216,"returns":10,"avg_order":540.9,"net_revenue":111425.0,"return_rate":4.63},{"month":"2024-10","month_label":"Oct 2024","region":"North America","category":"Home & Garden","revenue":88698,"orders":592,"returns":57,"avg_order":149.83,"net_revenue":80157.69,"return_rate":9.63},{"month":"2024-10","month_label":"Oct 2024","region":"North America","category":"Sports","revenue":58925,"orders":428,"returns":18,"avg_order":137.68,"net_revenue":56446.76,"return_rate":4.21},{"month":"2024-10","month_label":"Oct 2024","region":"North America","category":"Books","revenue":56832,"orders":308,"returns":14,"avg_order":184.52,"net_revenue":54248.72,"return_rate":4.55},{"month":"2024-10","month_label":"Oct 2024","region":"North America","category":"Beauty","revenue":103861,"orders":370,"returns":16,"avg_order":280.71,"net_revenue":99369.64,"return_rate":4.32},{"month":"2024-10","month_label":"Oct 2024","region":"Europe","category":"Electronics","revenue":34282,"orders":458,"returns":39,"avg_order":74.85,"net_revenue":31362.85,"return_rate":8.52},{"month":"2024-10","month_label":"Oct 2024","region":"Europe","category":"Clothing","revenue":35611,"orders":121,"returns":7,"avg_order":294.31,"net_revenue":33550.83,"return_rate":5.79},{"month":"2024-10","month_label":"Oct 2024","region":"Europe","category":"Home & Garden","revenue":58303,"orders":374,"returns":35,"avg_order":155.89,"net_revenue":52846.85,"return_rate":9.36},{"month":"2024-10","month_label":"Oct 2024","region":"Europe","category":"Sports","revenue":54711,"orders":501,"returns":39,"avg_order":109.2,"net_revenue":50452.2,"return_rate":7.78},{"month":"2024-10","month_label":"Oct 2024","region":"Europe","category":"Books","revenue":117974,"orders":222,"returns":18,"avg_order":531.41,"net_revenue":108408.62,"return_rate":8.11},{"month":"2024-10","month_label":"Oct 2024","region":"Europe","category":"Beauty","revenue":82728,"orders":304,"returns":19,"avg_order":272.13,"net_revenue":77557.53,"return_rate":6.25},{"month":"2024-10","month_label":"Oct 2024","region":"Asia Pacific","category":"Electronics","revenue":33381,"orders":183,"returns":15,"avg_order":182.41,"net_revenue":30644.85,"return_rate":8.2},{"month":"2024-10","month_label":"Oct 2024","region":"Asia Pacific","category":"Clothing","revenue":82506,"orders":277,"returns":31,"avg_order":297.86,"net_revenue":73272.34,"return_rate":11.19},{"month":"2024-10","month_label":"Oct 2024","region":"Asia Pacific","category":"Home & Garden","revenue":111646,"orders":258,"returns":15,"avg_order":432.74,"net_revenue":105154.9,"return_rate":5.81},{"month":"2024-10","month_label":"Oct 2024","region":"Asia Pacific","category":"Sports","revenue":102487,"orders":579,"returns":58,"avg_order":177.01,"net_revenue":92220.42,"return_rate":10.02},{"month":"2024-10","month_label":"Oct 2024","region":"Asia Pacific","category":"Books","revenue":86324,"orders":368,"returns":28,"avg_order":234.58,"net_revenue":79755.76,"return_rate":7.61},{"month":"2024-10","month_label":"Oct 2024","region":"Asia Pacific","category":"Beauty","revenue":24446,"orders":499,"returns":59,"avg_order":48.99,"net_revenue":21555.59,"return_rate":11.82},{"month":"2024-10","month_label":"Oct 2024","region":"Latin America","category":"Electronics","revenue":112720,"orders":176,"returns":16,"avg_order":640.45,"net_revenue":102472.8,"return_rate":9.09},{"month":"2024-10","month_label":"Oct 2024","region":"Latin America","category":"Clothing","revenue":47154,"orders":368,"returns":12,"avg_order":128.14,"net_revenue":45616.32,"return_rate":3.26},{"month":"2024-10","month_label":"Oct 2024","region":"Latin America","category":"Home & Garden","revenue":34029,"orders":596,"returns":64,"avg_order":57.1,"net_revenue":30374.6,"return_rate":10.74},{"month":"2024-10","month_label":"Oct 2024","region":"Latin America","category":"Sports","revenue":58872,"orders":197,"returns":20,"avg_order":298.84,"net_revenue":52895.2,"return_rate":10.15},{"month":"2024-10","month_label":"Oct 2024","region":"Latin America","category":"Books","revenue":38710,"orders":307,"returns":21,"avg_order":126.09,"net_revenue":36062.11,"return_rate":6.84},{"month":"2024-10","month_label":"Oct 2024","region":"Latin America","category":"Beauty","revenue":79435,"orders":94,"returns":9,"avg_order":845.05,"net_revenue":71829.55,"return_rate":9.57},{"month":"2024-10","month_label":"Oct 2024","region":"Middle East","category":"Electronics","revenue":79772,"orders":236,"returns":11,"avg_order":338.02,"net_revenue":76053.78,"return_rate":4.66},{"month":"2024-10","month_label":"Oct 2024","region":"Middle East","category":"Clothing","revenue":116195,"orders":209,"returns":6,"avg_order":555.96,"net_revenue":112859.24,"return_rate":2.87},{"month":"2024-10","month_label":"Oct 2024","region":"Middle East","category":"Home & Garden","revenue":115978,"orders":371,"returns":35,"avg_order":312.61,"net_revenue":105036.65,"return_rate":9.43},{"month":"2024-10","month_label":"Oct 2024","region":"Middle East","category":"Sports","revenue":115420,"orders":90,"returns":10,"avg_order":1282.44,"net_revenue":102595.6,"return_rate":11.11},{"month":"2024-10","month_label":"Oct 2024","region":"Middle East","category":"Books","revenue":91325,"orders":213,"returns":14,"avg_order":428.76,"net_revenue":85322.36,"return_rate":6.57},{"month":"2024-10","month_label":"Oct 2024","region":"Middle East","category":"Beauty","revenue":15814,"orders":425,"returns":48,"avg_order":37.21,"net_revenue":14027.92,"return_rate":11.29},{"month":"2024-11","month_label":"Nov 2024","region":"North America","category":"Electronics","revenue":17443,"orders":297,"returns":24,"avg_order":58.73,"net_revenue":16033.48,"return_rate":8.08},{"month":"2024-11","month_label":"Nov 2024","region":"North America","category":"Clothing","revenue":32368,"orders":539,"returns":21,"avg_order":60.05,"net_revenue":31106.95,"return_rate":3.9},{"month":"2024-11","month_label":"Nov 2024","region":"North America","category":"Home & Garden","revenue":95879,"orders":403,"returns":40,"avg_order":237.91,"net_revenue":86362.6,"return_rate":9.93},{"month":"2024-11","month_label":"Nov 2024","region":"North America","category":"Sports","revenue":68028,"orders":206,"returns":9,"avg_order":330.23,"net_revenue":65055.93,"return_rate":4.37},{"month":"2024-11","month_label":"Nov 2024","region":"North America","category":"Books","revenue":80310,"orders":457,"returns":16,"avg_order":175.73,"net_revenue":77498.32,"return_rate":3.5},{"month":"2024-11","month_label":"Nov 2024","region":"North America","category":"Beauty","revenue":101066,"orders":108,"returns":4,"avg_order":935.8,"net_revenue":97322.8,"return_rate":3.7},{"month":"2024-11","month_label":"Nov 2024","region":"Europe","category":"Electronics","revenue":83904,"orders":486,"returns":19,"avg_order":172.64,"net_revenue":80623.84,"return_rate":3.91},{"month":"2024-11","month_label":"Nov 2024","region":"Europe","category":"Clothing","revenue":37116,"orders":484,"returns":21,"avg_order":76.69,"net_revenue":35505.51,"return_rate":4.34},{"month":"2024-11","month_label":"Nov 2024","region":"Europe","category":"Home & Garden","revenue":62523,"orders":261,"returns":27,"avg_order":239.55,"net_revenue":56055.15,"return_rate":10.34},{"month":"2024-11","month_label":"Nov 2024","region":"Europe","category":"Sports","revenue":116376,"orders":450,"returns":37,"avg_order":258.61,"net_revenue":106807.43,"return_rate":8.22},{"month":"2024-11","month_label":"Nov 2024","region":"Europe","category":"Books","revenue":83244,"orders":510,"returns":17,"avg_order":163.22,"net_revenue":80469.26,"return_rate":3.33},{"month":"2024-11","month_label":"Nov 2024","region":"Europe","category":"Beauty","revenue":112416,"orders":281,"returns":28,"avg_order":400.06,"net_revenue":101214.32,"return_rate":9.96},{"month":"2024-11","month_label":"Nov 2024","region":"Asia Pacific","category":"Electronics","revenue":117516,"orders":323,"returns":25,"avg_order":363.83,"net_revenue":108420.25,"return_rate":7.74},{"month":"2024-11","month_label":"Nov 2024","region":"Asia Pacific","category":"Clothing","revenue":88509,"orders":465,"returns":33,"avg_order":190.34,"net_revenue":82227.78,"return_rate":7.1},{"month":"2024-11","month_label":"Nov 2024","region":"Asia Pacific","category":"Home & Garden","revenue":23666,"orders":497,"returns":55,"avg_order":47.62,"net_revenue":21046.9,"return_rate":11.07},{"month":"2024-11","month_label":"Nov 2024","region":"Asia Pacific","category":"Sports","revenue":21783,"orders":258,"returns":13,"avg_order":84.43,"net_revenue":20685.41,"return_rate":5.04},{"month":"2024-11","month_label":"Nov 2024","region":"Asia Pacific","category":"Books","revenue":82526,"orders":259,"returns":17,"avg_order":318.63,"net_revenue":77109.29,"return_rate":6.56},{"month":"2024-11","month_label":"Nov 2024","region":"Asia Pacific","category":"Beauty","revenue":102895,"orders":240,"returns":15,"avg_order":428.73,"net_revenue":96464.05,"return_rate":6.25},{"month":"2024-11","month_label":"Nov 2024","region":"Latin America","category":"Electronics","revenue":109270,"orders":235,"returns":11,"avg_order":464.98,"net_revenue":104155.22,"return_rate":4.68},{"month":"2024-11","month_label":"Nov 2024","region":"Latin America","category":"Clothing","revenue":42696,"orders":163,"returns":11,"avg_order":261.94,"net_revenue":39814.66,"return_rate":6.75},{"month":"2024-11","month_label":"Nov 2024","region":"Latin America","category":"Home & Garden","revenue":117547,"orders":421,"returns":15,"avg_order":279.21,"net_revenue":113358.85,"return_rate":3.56},{"month":"2024-11","month_label":"Nov 2024","region":"Latin America","category":"Sports","revenue":90452,"orders":439,"returns":33,"avg_order":206.04,"net_revenue":83652.68,"return_rate":7.52},{"month":"2024-11","month_label":"Nov 2024","region":"Latin America","category":"Books","revenue":90520,"orders":220,"returns":14,"avg_order":411.45,"net_revenue":84759.7,"return_rate":6.36},{"month":"2024-11","month_label":"Nov 2024","region":"Latin America","category":"Beauty","revenue":17482,"orders":397,"returns":19,"avg_order":44.04,"net_revenue":16645.24,"return_rate":4.79},{"month":"2024-11","month_label":"Nov 2024","region":"Middle East","category":"Electronics","revenue":74676,"orders":384,"returns":12,"avg_order":194.47,"net_revenue":72342.36,"return_rate":3.12},{"month":"2024-11","month_label":"Nov 2024","region":"Middle East","category":"Clothing","revenue":105397,"orders":223,"returns":18,"avg_order":472.63,"net_revenue":96889.66,"return_rate":8.07},{"month":"2024-11","month_label":"Nov 2024","region":"Middle East","category":"Home & Garden","revenue":33449,"orders":450,"returns":31,"avg_order":74.33,"net_revenue":31144.77,"return_rate":6.89},{"month":"2024-11","month_label":"Nov 2024","region":"Middle East","category":"Sports","revenue":43865,"orders":581,"returns":40,"avg_order":75.5,"net_revenue":40845.0,"return_rate":6.88},{"month":"2024-11","month_label":"Nov 2024","region":"Middle East","category":"Books","revenue":41737,"orders":301,"returns":24,"avg_order":138.66,"net_revenue":38409.16,"return_rate":7.97},{"month":"2024-11","month_label":"Nov 2024","region":"Middle East","category":"Beauty","revenue":80155,"orders":343,"returns":36,"avg_order":233.69,"net_revenue":71742.16,"return_rate":10.5},{"month":"2024-12","month_label":"Dec 2024","region":"North America","category":"Electronics","revenue":55806,"orders":537,"returns":59,"avg_order":103.92,"net_revenue":49674.72,"return_rate":10.99},{"month":"2024-12","month_label":"Dec 2024","region":"North America","category":"Clothing","revenue":67603,"orders":166,"returns":19,"avg_order":407.25,"net_revenue":59865.25,"return_rate":11.45},{"month":"2024-12","month_label":"Dec 2024","region":"North America","category":"Home & Garden","revenue":41399,"orders":257,"returns":27,"avg_order":161.09,"net_revenue":37049.57,"return_rate":10.51},{"month":"2024-12","month_label":"Dec 2024","region":"North America","category":"Sports","revenue":91534,"orders":522,"returns":39,"avg_order":175.35,"net_revenue":84695.35,"return_rate":7.47},{"month":"2024-12","month_label":"Dec 2024","region":"North America","category":"Books","revenue":89055,"orders":133,"returns":8,"avg_order":669.59,"net_revenue":83698.28,"return_rate":6.02},{"month":"2024-12","month_label":"Dec 2024","region":"North America","category":"Beauty","revenue":83836,"orders":130,"returns":11,"avg_order":644.89,"net_revenue":76742.21,"return_rate":8.46},{"month":"2024-12","month_label":"Dec 2024","region":"Europe","category":"Electronics","revenue":116358,"orders":343,"returns":13,"avg_order":339.24,"net_revenue":111947.88,"return_rate":3.79},{"month":"2024-12","month_label":"Dec 2024","region":"Europe","category":"Clothing","revenue":49911,"orders":167,"returns":15,"avg_order":298.87,"net_revenue":45427.95,"return_rate":8.98},{"month":"2024-12","month_label":"Dec 2024","region":"Europe","category":"Home & Garden","revenue":75535,"orders":570,"returns":66,"avg_order":132.52,"net_revenue":66788.68,"return_rate":11.58},{"month":"2024-12","month_label":"Dec 2024","region":"Europe","category":"Sports","revenue":69771,"orders":244,"returns":10,"avg_order":285.95,"net_revenue":66911.5,"return_rate":4.1},{"month":"2024-12","month_label":"Dec 2024","region":"Europe","category":"Books","revenue":101925,"orders":86,"returns":7,"avg_order":1185.17,"net_revenue":93628.81,"return_rate":8.14},{"month":"2024-12","month_label":"Dec 2024","region":"Europe","category":"Beauty","revenue":31032,"orders":230,"returns":24,"avg_order":134.92,"net_revenue":27793.92,"return_rate":10.43},{"month":"2024-12","month_label":"Dec 2024","region":"Asia Pacific","category":"Electronics","revenue":35079,"orders":460,"returns":50,"avg_order":76.26,"net_revenue":31266.0,"return_rate":10.87},{"month":"2024-12","month_label":"Dec 2024","region":"Asia Pacific","category":"Clothing","revenue":65460,"orders":161,"returns":17,"avg_order":406.58,"net_revenue":58548.14,"return_rate":10.56},{"month":"2024-12","month_label":"Dec 2024","region":"Asia Pacific","category":"Home & Garden","revenue":38236,"orders":465,"returns":29,"avg_order":82.23,"net_revenue":35851.33,"return_rate":6.24},{"month":"2024-12","month_label":"Dec 2024","region":"Asia Pacific","category":"Sports","revenue":91918,"orders":475,"returns":49,"avg_order":193.51,"net_revenue":82436.01,"return_rate":10.32},{"month":"2024-12","month_label":"Dec 2024","region":"Asia Pacific","category":"Books","revenue":48572,"orders":335,"returns":26,"avg_order":144.99,"net_revenue":44802.26,"return_rate":7.76},{"month":"2024-12","month_label":"Dec 2024","region":"Asia Pacific","category":"Beauty","revenue":77516,"orders":579,"returns":68,"avg_order":133.88,"net_revenue":68412.16,"return_rate":11.74},{"month":"2024-12","month_label":"Dec 2024","region":"Latin America","category":"Electronics","revenue":32771,"orders":359,"returns":14,"avg_order":91.28,"net_revenue":31493.08,"return_rate":3.9},{"month":"2024-12","month_label":"Dec 2024","region":"Latin America","category":"Clothing","revenue":63285,"orders":138,"returns":15,"avg_order":458.59,"net_revenue":56406.15,"return_rate":10.87},{"month":"2024-12","month_label":"Dec 2024","region":"Latin America","category":"Home & Garden","revenue":101143,"orders":194,"returns":14,"avg_order":521.36,"net_revenue":93843.96,"return_rate":7.22},{"month":"2024-12","month_label":"Dec 2024","region":"Latin America","category":"Sports","revenue":93344,"orders":316,"returns":20,"avg_order":295.39,"net_revenue":87436.2,"return_rate":6.33},{"month":"2024-12","month_label":"Dec 2024","region":"Latin America","category":"Books","revenue":38752,"orders":357,"returns":37,"avg_order":108.55,"net_revenue":34735.65,"return_rate":10.36},{"month":"2024-12","month_label":"Dec 2024","region":"Latin America","category":"Beauty","revenue":70961,"orders":521,"returns":57,"avg_order":136.2,"net_revenue":63197.6,"return_rate":10.94},{"month":"2024-12","month_label":"Dec 2024","region":"Middle East","category":"Electronics","revenue":89532,"orders":154,"returns":16,"avg_order":581.38,"net_revenue":80229.92,"return_rate":10.39},{"month":"2024-12","month_label":"Dec 2024","region":"Middle East","category":"Clothing","revenue":76268,"orders":121,"returns":9,"avg_order":630.31,"net_revenue":70595.21,"return_rate":7.44},{"month":"2024-12","month_label":"Dec 2024","region":"Middle East","category":"Home & Garden","revenue":46653,"orders":113,"returns":9,"avg_order":412.86,"net_revenue":42937.26,"return_rate":7.96},{"month":"2024-12","month_label":"Dec 2024","region":"Middle East","category":"Sports","revenue":112432,"orders":457,"returns":43,"avg_order":246.02,"net_revenue":101853.14,"return_rate":9.41},{"month":"2024-12","month_label":"Dec 2024","region":"Middle East","category":"Books","revenue":63756,"orders":421,"returns":17,"avg_order":151.44,"net_revenue":61181.52,"return_rate":4.04},{"month":"2024-12","month_label":"Dec 2024","region":"Middle East","category":"Beauty","revenue":96182,"orders":247,"returns":12,"avg_order":389.4,"net_revenue":91509.2,"return_rate":4.86}];
+
+// ──────────────────────────────────────────────
+// CHART REGISTRY & THEME
+// ──────────────────────────────────────────────
+const CHARTS = {};
+const COLORS = {
+  blue:'#5b8fff', red:'#ff6b6b', green:'#43d9ad', yellow:'#f9c74f',
+  purple:'#c77dff', orange:'#ff9f1c',
+};
+const CAT_COLORS = [COLORS.blue,COLORS.red,COLORS.green,COLORS.yellow,COLORS.purple,COLORS.orange];
+const MONTH_ORDER = ['Jan 2024','Feb 2024','Mar 2024','Apr 2024','May 2024','Jun 2024','Jul 2024','Aug 2024','Sep 2024','Oct 2024','Nov 2024','Dec 2024'];
+const REGIONS = ['North America','Europe','Asia Pacific','Latin America','Middle East'];
+const CATS   = ['Electronics','Clothing','Home & Garden','Sports','Books','Beauty'];
+
+Chart.defaults.color = '#6b7280';
+Chart.defaults.font.family = "'DM Mono', monospace";
+Chart.defaults.font.size = 11;
+const GRID_COLOR = 'rgba(30,37,53,0.8)';
+
+function fmt(n){ return n>=1e6 ? `$${(n/1e6).toFixed(1)}M` : n>=1e3 ? `$${(n/1e3).toFixed(0)}K` : `$${n}`; }
+function fmtN(n){ return n>=1e6 ? `${(n/1e6).toFixed(1)}M` : n>=1e3 ? `${(n/1e3).toFixed(0)}K` : n; }
+
+// ──────────────────────────────────────────────
+// DATA HELPERS
+// ──────────────────────────────────────────────
+function filtered(){
+  const r = document.getElementById('regionFilter').value;
+  const c = document.getElementById('categoryFilter').value;
+  return RAW.filter(d => (r==='all'||d.region===r) && (c==='all'||d.category===c));
+}
+
+function groupBy(data, key){
+  return data.reduce((acc, d) => { acc[d[key]] = (acc[d[key]]||0) + d.revenue; return acc; }, {});
+}
+
+// ──────────────────────────────────────────────
+// KPIs
+// ──────────────────────────────────────────────
+function updateKPIs(data){
+  const rev = data.reduce((s,d)=>s+d.revenue,0);
+  const ord = data.reduce((s,d)=>s+d.orders,0);
+  const ret = data.length ? data.reduce((s,d)=>s+d.return_rate,0)/data.length : 0;
+  document.getElementById('kpi-revenue').textContent = fmt(rev);
+  document.getElementById('kpi-orders').textContent  = fmtN(ord);
+  document.getElementById('kpi-aov').textContent     = ord ? `$${(rev/ord).toFixed(2)}` : '—';
+  document.getElementById('kpi-return').textContent  = `${ret.toFixed(1)}%`;
+}
+
+// ──────────────────────────────────────────────
+// CHARTS
+// ──────────────────────────────────────────────
+function makeChart(id, config){
+  if(CHARTS[id]) CHARTS[id].destroy();
+  CHARTS[id] = new Chart(document.getElementById(id), config);
+}
+
+function updateLineChart(data){
+  const byMonth = {};
+  MONTH_ORDER.forEach(m => byMonth[m] = 0);
+  data.forEach(d => { if(byMonth[d.month_label]!==undefined) byMonth[d.month_label] += d.revenue; });
+  const vals = MONTH_ORDER.map(m => byMonth[m]);
+
+  makeChart('lineChart',{
+    type:'line',
+    data:{
+      labels: MONTH_ORDER.map(m => m.split(' ')[0]),
+      datasets:[{
+        label:'Revenue',
+        data: vals,
+        borderColor: COLORS.blue,
+        backgroundColor: 'rgba(91,143,255,0.08)',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointBackgroundColor: COLORS.blue,
+        pointBorderColor: '#0a0c10',
+        pointBorderWidth: 2,
+        tension: 0.4,
+        fill: true,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label: c => ` ${fmt(c.raw)}`}} },
+      scales:{
+        x:{ grid:{color:GRID_COLOR}, ticks:{color:'#6b7280'} },
+        y:{ grid:{color:GRID_COLOR}, ticks:{callback: v=>fmt(v), color:'#6b7280'} }
+      }
+    }
+  });
+}
+
+function updateDonutChart(data){
+  const regionFilter = document.getElementById('regionFilter').value;
+  const byRegion = {};
+  REGIONS.forEach(r => byRegion[r] = 0);
+  data.forEach(d => byRegion[d.region] = (byRegion[d.region]||0) + d.revenue);
+
+  makeChart('donutChart',{
+    type:'doughnut',
+    data:{
+      labels: REGIONS,
+      datasets:[{ data: REGIONS.map(r=>byRegion[r]), backgroundColor: CAT_COLORS, borderColor:'#0a0c10', borderWidth:3, hoverOffset:6 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'68%',
+      plugins:{
+        legend:{ position:'bottom', labels:{ boxWidth:10, padding:12, color:'#6b7280', font:{size:10} } },
+        tooltip:{callbacks:{label: c => ` ${c.label}: ${fmt(c.raw)}`}}
+      }
+    }
+  });
+}
+
+function updateBarChart(data){
+  const byCat = {};
+  CATS.forEach(c => byCat[c] = 0);
+  data.forEach(d => byCat[d.category] = (byCat[d.category]||0) + d.revenue);
+
+  makeChart('barChart',{
+    type:'bar',
+    data:{
+      labels: CATS,
+      datasets:[{
+        label:'Revenue',
+        data: CATS.map(c=>byCat[c]),
+        backgroundColor: CAT_COLORS.map(c=>c+'cc'),
+        borderColor: CAT_COLORS,
+        borderWidth:1, borderRadius:4
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label: c => ` ${fmt(c.raw)}`}} },
+      scales:{
+        x:{ grid:{color:GRID_COLOR}, ticks:{callback: v=>fmt(v), color:'#6b7280'} },
+        y:{ grid:{display:false}, ticks:{color:'#6b7280'} }
+      }
+    }
+  });
+}
+
+function updateReturnChart(data){
+  const byCat = {};
+  const cnt   = {};
+  CATS.forEach(c => { byCat[c]=0; cnt[c]=0; });
+  data.forEach(d => { byCat[d.category]+=d.return_rate; cnt[d.category]++; });
+  const rates = CATS.map(c => cnt[c] ? (byCat[c]/cnt[c]).toFixed(2) : 0);
+
+  makeChart('returnChart',{
+    type:'bar',
+    data:{
+      labels: CATS,
+      datasets:[{
+        label:'Return Rate %',
+        data: rates,
+        backgroundColor: CAT_COLORS.map(c=>c+'99'),
+        borderColor: CAT_COLORS,
+        borderWidth:1, borderRadius:4
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label: c => ` ${c.raw}%`}} },
+      scales:{
+        x:{ grid:{display:false}, ticks:{color:'#6b7280', font:{size:9}} },
+        y:{ grid:{color:GRID_COLOR}, ticks:{callback:v=>v+'%', color:'#6b7280'} }
+      }
+    }
+  });
+}
+
+function updateScatterChart(data){
+  // Aggregate by category for scatter: avg orders vs avg revenue
+  const byCat = {};
+  const cnt   = {};
+  CATS.forEach(c => { byCat[c]={rev:0,ord:0}; cnt[c]=0; });
+  data.forEach(d => { byCat[d.category].rev+=d.revenue; byCat[d.category].ord+=d.orders; cnt[d.category]++; });
+  const pts = CATS.map((c,i)=>({
+    x: cnt[c] ? Math.round(byCat[c].ord/cnt[c]) : 0,
+    y: cnt[c] ? Math.round(byCat[c].rev/cnt[c]) : 0,
+    label: c,
+    color: CAT_COLORS[i]
+  }));
+
+  makeChart('scatterChart',{
+    type:'scatter',
+    data:{
+      datasets: pts.map(p=>({
+        label: p.label,
+        data:[{x:p.x,y:p.y}],
+        backgroundColor: p.color+'cc',
+        borderColor: p.color,
+        borderWidth:1,
+        pointRadius:9,
+        pointHoverRadius:12
+      }))
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{ callbacks:{ label: c => ` ${c.dataset.label}: ${fmtN(c.parsed.x)} orders, ${fmt(c.parsed.y)}` } }
+      },
+      scales:{
+        x:{ title:{display:true,text:'Avg Orders/Month',color:'#6b7280'}, grid:{color:GRID_COLOR}, ticks:{color:'#6b7280'} },
+        y:{ title:{display:true,text:'Avg Revenue',color:'#6b7280'}, grid:{color:GRID_COLOR}, ticks:{callback:v=>fmt(v),color:'#6b7280'} }
+      }
+    }
+  });
+}
+
+function updateTable(data){
+  const byCat={};
+  CATS.forEach(c=>byCat[c]={rev:0,ord:0,rr:0,cnt:0});
+  data.forEach(d=>{byCat[d.category].rev+=d.revenue;byCat[d.category].ord+=d.orders;byCat[d.category].rr+=d.return_rate;byCat[d.category].cnt++;});
+  const total = CATS.reduce((s,c)=>s+byCat[c].rev,0)||1;
+
+  const rows = CATS.map((c,i)=>{
+    const d=byCat[c];
+    const aov = d.ord ? (d.rev/d.ord).toFixed(2) : 0;
+    const rr  = d.cnt ? (d.rr/d.cnt).toFixed(1) : 0;
+    const share = ((d.rev/total)*100).toFixed(1);
+    return `<tr>
+      <td style="color:${CAT_COLORS[i]};font-weight:500">${c}</td>
+      <td>${fmt(d.rev)}</td>
+      <td>${fmtN(d.ord)}</td>
+      <td>$${aov}</td>
+      <td style="color:${rr>9?'#ff6b6b':rr>6?'#f9c74f':'#43d9ad'}">${rr}%</td>
+      <td>
+        <div class="trend-bar-wrap">
+          <div class="trend-bar" style="width:${share*2}px;background:${CAT_COLORS[i]}"></div>
+          <span style="font-size:11px;color:#6b7280">${share}%</span>
+        </div>
+      </td>
+    </tr>`;
+  });
+  document.getElementById('tableBody').innerHTML = rows.join('');
+}
+
+// ──────────────────────────────────────────────
+// MAIN UPDATE
+// ──────────────────────────────────────────────
+function update(){
+  const data = filtered();
+  updateKPIs(data);
+  updateLineChart(data);
+  updateDonutChart(data);
+  updateBarChart(data);
+  updateReturnChart(data);
+  updateScatterChart(data);
+  updateTable(data);
+}
+
+function resetFilters(){
+  document.getElementById('regionFilter').value='all';
+  document.getElementById('categoryFilter').value='all';
+  update();
+}
+
+document.getElementById('regionFilter').addEventListener('change', update);
+document.getElementById('categoryFilter').addEventListener('change', update);
+
+// Initial render
+update();
+</script>
+</body>
+</html>

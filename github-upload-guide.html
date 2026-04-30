@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Upload Guide — E-Commerce Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d1117; --surface:#161b22; --surface2:#21262d;
+    --border:#30363d; --accent:#58a6ff; --green:#3fb950;
+    --yellow:#d29922; --red:#f85149; --purple:#bc8cff;
+    --text:#e6edf3; --muted:#8b949e;
+    --font:'DM Mono',monospace; --head:'Syne',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);padding:40px 20px;max-width:800px;margin:0 auto;}
+  h1{font-family:var(--head);font-size:28px;font-weight:800;margin-bottom:4px;letter-spacing:-0.03em;}
+  .subtitle{color:var(--muted);font-size:12px;margin-bottom:40px;}
+
+  .phase{margin-bottom:36px;}
+  .phase-title{
+    display:flex;align-items:center;gap:10px;
+    font-family:var(--head);font-size:15px;font-weight:700;
+    margin-bottom:16px;padding-bottom:10px;
+    border-bottom:1px solid var(--border);
+  }
+  .phase-num{
+    width:26px;height:26px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;flex-shrink:0;
+  }
+  .n-blue{background:rgba(88,166,255,0.2);color:var(--accent);}
+  .n-green{background:rgba(63,185,80,0.2);color:var(--green);}
+  .n-yellow{background:rgba(210,153,34,0.2);color:var(--yellow);}
+  .n-purple{background:rgba(188,140,255,0.2);color:var(--purple);}
+  .n-red{background:rgba(248,81,73,0.2);color:var(--red);}
+
+  .step{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:8px;padding:16px 20px;margin-bottom:10px;
+    display:flex;gap:14px;align-items:flex-start;
+  }
+  .step-num{
+    width:22px;height:22px;border-radius:4px;
+    background:var(--surface2);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;color:var(--muted);flex-shrink:0;margin-top:1px;
+  }
+  .step-body{flex:1;}
+  .step-title{font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text);}
+  .step-desc{font-size:11px;color:var(--muted);line-height:1.7;}
+
+  code{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:4px;padding:2px 6px;font-family:var(--font);
+    font-size:11px;color:var(--green);
+  }
+  pre{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:6px;padding:14px 16px;margin:10px 0;
+    overflow-x:auto;
+  }
+  pre code{background:none;border:none;padding:0;font-size:11px;color:var(--green);line-height:1.8;}
+
+  .note{
+    background:rgba(88,166,255,0.08);border:1px solid rgba(88,166,255,0.25);
+    border-radius:6px;padding:10px 14px;margin:10px 0;
+    font-size:11px;color:var(--accent);line-height:1.7;
+  }
+  .warn{
+    background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.25);
+    border-radius:6px;padding:10px 14px;margin:10px 0;
+    font-size:11px;color:var(--yellow);line-height:1.7;
+  }
+  .success{
+    background:rgba(63,185,80,0.08);border:1px solid rgba(63,185,80,0.25);
+    border-radius:6px;padding:10px 14px;margin:10px 0;
+    font-size:11px;color:var(--green);line-height:1.7;
+  }
+
+  .file-tree{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:6px;padding:14px 16px;margin:10px 0;
+    font-size:11px;color:var(--muted);line-height:2;
+    font-family:var(--font);
+  }
+  .file-tree .dir{color:var(--accent);}
+  .file-tree .file{color:var(--text);}
+  .file-tree .comment{color:var(--muted);}
+
+  .resume-box{
+    background:var(--surface);border:1px solid var(--green);
+    border-radius:8px;padding:20px;margin-top:32px;
+  }
+  .resume-title{font-family:var(--head);font-size:14px;font-weight:700;color:var(--green);margin-bottom:12px;}
+  .resume-entry{font-size:12px;line-height:1.8;color:var(--text);}
+  .resume-entry strong{color:var(--accent);}
+  .bullet{color:var(--muted);margin-right:6px;}
+</style>
+</head>
+<body>
+
+<h1>GitHub Upload Guide</h1>
+<div class="subtitle">E-Commerce Sales Dashboard · Step-by-step from zero to live GitHub Pages URL</div>
+
+<!-- PHASE 1 -->
+<div class="phase">
+  <div class="phase-title">
+    <div class="phase-num n-blue">1</div>
+    Install Git (if not installed)
+  </div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <div class="step-title">Check if Git is already installed</div>
+      <div class="step-desc">Open your terminal (Command Prompt / PowerShell on Windows, Terminal on Mac) and run:</div>
+      <pre><code>git --version</code></pre>
+      <div class="step-desc">If you see something like <code>git version 2.43.0</code>, skip to Phase 2. Otherwise continue below.</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <div class="step-title">Install Git</div>
+      <div class="step-desc">
+        <strong>Windows:</strong> Download from <code>git-scm.com/download/win</code> → run installer with default settings<br><br>
+        <strong>Mac:</strong> Run in terminal: <code>xcode-select --install</code><br><br>
+        After installing, configure your identity:
+      </div>
+      <pre><code>git config --global user.name "Your Name"
+git config --global user.email "your@email.com"</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 2 -->
+<div class="phase">
+  <div class="phase-title">
+    <div class="phase-num n-green">2</div>
+    Create a GitHub Account & Repository
+  </div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <div class="step-title">Sign up / Log in to GitHub</div>
+      <div class="step-desc">Go to <code>github.com</code> → Sign up (free) or log in to your existing account.</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <div class="step-title">Create a new repository</div>
+      <div class="step-desc">
+        • Click the green <strong>"New"</strong> button on your GitHub homepage<br>
+        • Repository name: <code>ecommerce-dashboard</code><br>
+        • Description: <em>Interactive e-commerce sales dashboard — Python, Chart.js</em><br>
+        • Set to <strong>Public</strong> (required for free GitHub Pages)<br>
+        • ✅ Check "Add a README file"<br>
+        • Click <strong>"Create repository"</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 3 -->
+<div class="phase">
+  <div class="phase-title">
+    <div class="phase-num n-yellow">3</div>
+    Organize Your Project Files
+  </div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <div class="step-title">Create the project folder on your computer</div>
+      <div class="step-desc">Create a folder called <code>ecommerce-dashboard</code> on your Desktop or Documents. Your folder should look like this:</div>
+      <div class="file-tree">
+        <span class="dir">ecommerce-dashboard/</span><br>
+        &nbsp;&nbsp;├── <span class="file">index.html</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">← The dashboard (downloaded from Claude)</span><br>
+        &nbsp;&nbsp;├── <span class="file">data_prep.py</span> &nbsp;&nbsp;<span class="comment">← Python script (downloaded from Claude)</span><br>
+        &nbsp;&nbsp;├── <span class="file">README.md</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">← README (downloaded from Claude)</span><br>
+        &nbsp;&nbsp;└── <span class="dir">processed/</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">monthly_trend.csv</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">category_performance.csv</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">regional_breakdown.csv</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="file">dashboard_data.json</span>
+      </div>
+      <div class="note">💡 The <code>processed/</code> folder is generated when you run <code>python data_prep.py</code> locally. You can also just upload the 3 files (index.html, data_prep.py, README.md) and that's enough for a great GitHub portfolio.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 4 -->
+<div class="phase">
+  <div class="phase-title">
+    <div class="phase-num n-purple">4</div>
+    Push Files to GitHub
+  </div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <div class="step-title">Open terminal and navigate to your project folder</div>
+      <pre><code># Mac/Linux
+cd ~/Desktop/ecommerce-dashboard
+
+# Windows (PowerShell)
+cd C:\Users\YourName\Desktop\ecommerce-dashboard</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <div class="step-title">Initialize git and connect to GitHub</div>
+      <pre><code># Initialize a new git repository
+git init
+
+# Add the GitHub repo as remote origin
+# (Replace YOUR-USERNAME with your actual GitHub username)
+git remote add origin https://github.com/YOUR-USERNAME/ecommerce-dashboard.git</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <div class="step-title">Stage all files and make your first commit</div>
+      <pre><code># Stage everything
+git add .
+
+# Commit with a message
+git commit -m "Add e-commerce sales dashboard - Python, Chart.js, Apr 2026"</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <div class="step-title">Push to GitHub</div>
+      <pre><code># Push to the main branch
+git branch -M main
+git push -u origin main</code></pre>
+      <div class="step-desc">GitHub will prompt for your username and password. For the password, use a <strong>Personal Access Token</strong> (not your account password) — see next step.</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-body">
+      <div class="step-title">Create a Personal Access Token (if prompted)</div>
+      <div class="step-desc">
+        GitHub no longer accepts passwords for git push. To create a token:<br><br>
+        1. GitHub → <strong>Settings</strong> (top-right avatar menu)<br>
+        2. Left sidebar → <strong>Developer settings</strong><br>
+        3. <strong>Personal access tokens → Tokens (classic)</strong><br>
+        4. Click <strong>"Generate new token (classic)"</strong><br>
+        5. Give it a name, set expiry, check <strong>repo</strong> scope<br>
+        6. Click <strong>Generate token</strong> → <strong>copy it immediately</strong> (shown only once)<br>
+        7. Use this token as your password when git asks
+      </div>
+      <div class="warn">⚠️ Store the token somewhere safe (like a password manager). You won't be able to see it again on GitHub.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 5 -->
+<div class="phase">
+  <div class="phase-title">
+    <div class="phase-num n-red">5</div>
+    Enable GitHub Pages (Live URL)
+  </div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <div class="step-title">Go to your repo's Settings</div>
+      <div class="step-desc">On GitHub, open your <code>ecommerce-dashboard</code> repo → click the <strong>Settings</strong> tab at the top.</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <div class="step-title">Enable Pages</div>
+      <div class="step-desc">
+        • Left sidebar → <strong>Pages</strong><br>
+        • Under "Branch", select <strong>main</strong> and folder <strong>/ (root)</strong><br>
+        • Click <strong>Save</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <div class="step-title">Wait ~2 minutes, then visit your live URL</div>
+      <div class="step-desc">Your dashboard is now live at:</div>
+      <pre><code>https://YOUR-USERNAME.github.io/ecommerce-dashboard</code></pre>
+      <div class="success">✅ This is the link to put on your resume and LinkedIn! Anyone can open it in a browser with no install required.</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <div class="step-title">Update README with your live link</div>
+      <pre><code># Edit README.md — replace this line:
+[🔗 Live Demo](https://your-username.github.io/ecommerce-dashboard)
+
+# With your actual username:
+[🔗 Live Demo](https://johndoe.github.io/ecommerce-dashboard)
+
+# Then push the update:
+git add README.md
+git commit -m "Update README with live demo link"
+git push</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- RESUME BOX -->
+<div class="resume-box">
+  <div class="resume-title">✅ Final Resume Entry</div>
+  <div class="resume-entry">
+    <strong>E-Commerce Sales Dashboard</strong> — Power BI, Python (Pandas), Chart.js — Apr 2026<br><br>
+    <span class="bullet">•</span> Built interactive sales dashboard analyzing $24.7M revenue across 5 regions and 6 categories using Python (Pandas) for data pipeline and Chart.js for visualization<br>
+    <span class="bullet">•</span> Applied DAX-equivalent KPI calculations (AOV, return rate, net revenue) and implemented drill-down filtering by region and category<br>
+    <span class="bullet">•</span> Deployed as live GitHub Pages site; source code and data pipeline available on GitHub
+  </div>
+</div>
+
+</body>
+</html>
